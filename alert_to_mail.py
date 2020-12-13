@@ -2,7 +2,7 @@ import os
 import smtplib
 import ssl
 import traceback
-import PASSWORDS
+import SETTINGS
 from email.message import EmailMessage
 
 
@@ -14,12 +14,12 @@ def send_email(receiver_emails, subject, message, logger, attached_file=None, se
     server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
     # Try connect to server
     try:
-        server.login(PASSWORDS.settings['ymail_login'], PASSWORDS.settings['ymail_password'])
+        server.login(SETTINGS.settings['ymail_login'], SETTINGS.settings['ymail_password'])
     except Exception:
         logger.error("ERROR: Can't connect to SMTP server:\n" + traceback.format_exc())
     msg = EmailMessage()
     if sender_email is None:
-        sender_email = PASSWORDS.settings['sender_email']
+        sender_email = SETTINGS.settings['sender_email']
     msg["From"] = sender_email
     msg["Subject"] = subject
     msg.set_content(message)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     program_file = os.path.realpath(__file__)
     logger = custom_logger.get_logger(program_file=program_file)
 
-    receiver_emails = PASSWORDS.settings['recipient_emails']
+    receiver_emails = SETTINGS.settings['recipient_emails']
     subject = "DEBUG: send_email"
     message = "DEBUG: send_email"
     # attached_file = None

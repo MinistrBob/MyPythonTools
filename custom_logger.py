@@ -1,6 +1,6 @@
 import logging
 import os
-import PASSWORDS
+import SETTINGS
 from datetime import datetime
 
 
@@ -41,7 +41,7 @@ def get_logger(program_file=None, log_file=None, dt=True):
             log_name = prog_name_without_ext
         else:
             raise Exception("ERROR: Нужно либо явно задать log_file либо передать program_file")
-    if PASSWORDS.DEBUG:
+    if SETTINGS.DEBUG:
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO

@@ -127,4 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-PASSWORDS.py
+SETTINGS.py
+SETTINGS.py
