@@ -7,6 +7,7 @@ import SETTINGS
 from datetime import datetime
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
+from alert_to_mail import send_email
 
 program_file = os.path.realpath(__file__)
 logger = custom_logger.get_logger(program_file=program_file)
@@ -130,5 +131,25 @@ if __name__ == "__main__":
     logger.debug(f"list_no_backup=\n{list_no_backup}")
     logger.debug(f"list_expired=\n{list_expired}")
     logger.debug(f"report=\n{report}")
-    # list_diff = pprint.pformat(list_diff)
+    # Preparing of report
+    list_no_backup = pprint.pformat(list_no_backup)
+    list_expired = pprint.pformat(list_expired)
+    report = pprint.pformat(report)
+    text_of_report = "=" * 80 + \
+                     "\nList of virtual machines that have not been backed up\n" + \
+                     "=" * 80 + \
+                     f"\n{list_no_backup}\n" + \
+                     "=" * 80 + \
+                     "\nList of virtual machines whose backups are expired\n" + \
+                     "=" * 80 + \
+                     f"\n{list_expired}\n" + \
+                     "=" * 80 + \
+                     "\nFinal complete list\n" + \
+                     "=" * 80 + \
+                     f"\n{report}\n"
+    # Send report
+    receiver_emails = SETTINGS.settings['recipient_emails']
+    subject = "ControlVeeamBackup"
+    attached_file = logger.handlers[0].baseFilename
+    send_email(receiver_emails, subject, text_of_report, logger, attached_file)
     logger.info(">>>> END ControlVeeamBackup >>>>")
