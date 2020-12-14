@@ -43,6 +43,11 @@ def get_vm_name(vm, depth=1):
 
 
 def get_list_current_vbk():
+    if not os.path.exists(SETTINGS.settings['backup_dir']):
+        msg = f"Path backup_dir={SETTINGS.settings['backup_dir']} does not exist"
+        print(msg)
+        logger.error(msg)
+        exit(1)
     (_, _, filenames) = next(os.walk(SETTINGS.settings['backup_dir']))
     logger.debug(f"filenames=\n{filenames}")
     logger.info("VBK list processing")
