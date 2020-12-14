@@ -138,32 +138,35 @@ if __name__ == "__main__":
             # List of virtual machines that have not been backed up
             list_no_backup.append(vm_name)
             report.append(f"{vm_name} - !!! not backup !!!")
-    # Sort all lists
-    list_no_backup.sort()
-    list_expired.sort()
-    report.sort()
-    logger.debug(f"list_no_backup=\n{list_no_backup}")
-    logger.debug(f"list_expired=\n{list_expired}")
-    logger.debug(f"report=\n{report}")
-    # Preparing of report
-    list_no_backup = pprint.pformat(list_no_backup)
-    list_expired = pprint.pformat(list_expired)
-    report = pprint.pformat(report)
-    text_of_report = "=" * 80 + \
-                     "\nList of virtual machines that have not been backed up\n" + \
-                     "=" * 80 + \
-                     f"\n{list_no_backup}\n" + \
-                     "=" * 80 + \
-                     "\nList of virtual machines whose backups are expired\n" + \
-                     "=" * 80 + \
-                     f"\n{list_expired}\n" + \
-                     "=" * 80 + \
-                     "\nFinal complete list\n" + \
-                     "=" * 80 + \
-                     f"\n{report}\n"
-    # Send report
-    receiver_emails = SETTINGS.settings['recipient_emails']
-    subject = "ControlVeeamBackup"
-    attached_file = logger.handlers[0].baseFilename
-    send_email(receiver_emails, subject, text_of_report, logger, attached_file)
+    if not list_no_backup and not list_expired:
+        logger.info("All lists empty.")
+    else:
+        # Sort all lists
+        list_no_backup.sort()
+        list_expired.sort()
+        report.sort()
+        logger.debug(f"list_no_backup=\n{list_no_backup}")
+        logger.debug(f"list_expired=\n{list_expired}")
+        logger.debug(f"report=\n{report}")
+        # Preparing of report
+        list_no_backup = pprint.pformat(list_no_backup)
+        list_expired = pprint.pformat(list_expired)
+        report = pprint.pformat(report)
+        text_of_report = "=" * 80 + \
+                         "\nList of virtual machines that have not been backed up\n" + \
+                         "=" * 80 + \
+                         f"\n{list_no_backup}\n" + \
+                         "=" * 80 + \
+                         "\nList of virtual machines whose backups are expired\n" + \
+                         "=" * 80 + \
+                         f"\n{list_expired}\n" + \
+                         "=" * 80 + \
+                         "\nFinal complete list\n" + \
+                         "=" * 80 + \
+                         f"\n{report}\n"
+        # Send report
+        receiver_emails = SETTINGS.settings['recipient_emails']
+        subject = "ControlVeeamBackup"
+        attached_file = logger.handlers[0].baseFilename
+        send_email(receiver_emails, subject, text_of_report, logger, attached_file)
     logger.info(">>>> END ControlVeeamBackup >>>>")
