@@ -2,6 +2,8 @@ import os
 import ssl
 import atexit
 import pprint
+import traceback
+
 import custom_logger
 import SETTINGS
 from datetime import datetime
@@ -48,7 +50,7 @@ def get_list_current_vbk():
     # logger.debug(_list_current_vbk)
     _dict_current_vbk_with_date = {filename[:-16][:-11]: datetime.strptime(filename[:-16][-10:], '%Y-%m-%d') for
                                    filename
-                                   in filenames}
+                                   in filenames if filename.endswith('.vbk')}
     logger.debug(f"_dict_current_vbk_with_date=\n{_dict_current_vbk_with_date}")
     return _dict_current_vbk_with_date
 
@@ -63,9 +65,8 @@ def get_list_current_vms():
                       port=SETTINGS.settings['vmware_port'],
                       sslContext=context)
     if not si:
-        print("Could not connect to the specified host using specified "
-              "username and password")
-        return -1
+        print("Could not connect to the vCenter using specified username and password")
+        exit(1)
     logger.info("Connect to VMWare vCenter is OK")
     atexit.register(Disconnect, si)
 
@@ -97,10 +98,18 @@ if __name__ == "__main__":
 
     # Get list current backup files from disk
     logger.info("Get list current backup files from disk")
-    dict_current_vbk_with_date = get_list_current_vbk()
+    try:
+        dict_current_vbk_with_date = get_list_current_vbk()
+    except:
+        logger.error(traceback.format_exc())
+        exit(1)
     # Get list current VMs from ESXi
     logger.info("Get list current VMs from ESXi")
-    list_current_vms = get_list_current_vms()
+    try:
+        list_current_vms = get_list_current_vms()
+    except:
+        logger.error(traceback.format_exc())
+        exit(1)
     # Checking process
     logger.info("Checking process")
     list_no_backup = []  # Separate list of virtual machines that have not been backed up. For convenience.
