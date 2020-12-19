@@ -25,7 +25,7 @@ def send_email(receiver_emails, subject, message, logger, attached_file=None, se
     msg.set_content(message)
     if attached_file is not None:
         logger.info(f"attach file: {attached_file}")
-        msg.add_attachment(open(attached_file, "r").read(), filename=attached_file)
+        msg.add_attachment(open(attached_file, "r").read(), filename=os.path.basename(attached_file))
     else:
         logger.info("No attachments")
     logger.info(f"List emails: {receiver_emails}")
