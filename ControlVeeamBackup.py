@@ -91,31 +91,37 @@ def get_list_current_vms():
     return _list_current_vms
 
 
-def get_report():
-    global list_no_backup, list_expired, report, text_of_report
+def get_email_report(list_no_backup_, list_expired_, list_backup_vm_no_longer_exist_, report_):
     # Sort all lists
-    list_no_backup.sort()
-    list_expired.sort()
-    report.sort()
-    logger.debug(f"list_no_backup=\n{list_no_backup}")
-    logger.debug(f"list_expired=\n{list_expired}")
-    logger.debug(f"report=\n{report}")
+    list_no_backup_.sort()
+    list_expired_.sort()
+    list_backup_vm_no_longer_exist_.sort()
+    report_.sort()
+    logger.debug(f"list_no_backup=\n{list_no_backup_}")
+    logger.debug(f"list_expired=\n{list_expired_}")
+    logger.debug(f"list_backup_vm_no_longer_exist_=\n{list_backup_vm_no_longer_exist_}")
+    logger.debug(f"report=\n{report_}")
     # Preparing of report
-    list_no_backup = pprint.pformat(list_no_backup)
-    list_expired = pprint.pformat(list_expired)
-    report = pprint.pformat(report)
+    list_no_backup_ = pprint.pformat(list_no_backup_)
+    list_expired_ = pprint.pformat(list_expired_)
+    list_backup_vm_no_longer_exist_ = pprint.pformat(list_backup_vm_no_longer_exist_)
+    report_ = pprint.pformat(report_)
     _text_of_report = "=" * 80 + \
                       "\nList of virtual machines that have not been backed up\n" + \
                       "=" * 80 + \
-                      f"\n{list_no_backup}\n" + \
+                      f"\n{list_no_backup_}\n" + \
                       "=" * 80 + \
                       "\nList of virtual machines whose backups are expired\n" + \
                       "=" * 80 + \
-                      f"\n{list_expired}\n" + \
+                      f"\n{list_expired_}\n" + \
+                      "=" * 80 + \
+                      "\nList of backups of virtual machines that no longer exist\n" + \
+                      "=" * 80 + \
+                      f"\n{list_backup_vm_no_longer_exist_}\n" + \
                       "=" * 80 + \
                       "\nFinal complete list\n" + \
                       "=" * 80 + \
-                      f"\n{report}\n"
+                      f"\n{report_}\n"
     return _text_of_report
 
 
@@ -145,6 +151,10 @@ if __name__ == "__main__":
         logger.error(traceback.format_exc())
         exit(1)
 
+    # Get list of backups of virtual machines that no longer exist
+    list_backup_vm_no_longer_exist = list(set(dict_current_vbk_with_date) - set(list_current_vms))
+    logger.debug(f"list_backup_vm_no_longer_exist=\n{list_backup_vm_no_longer_exist}")
+
     # Checking process
     logger.info("Checking process")
     list_no_backup = []  # Separate list of virtual machines that have not been backed up. For convenience.
@@ -158,9 +168,13 @@ if __name__ == "__main__":
                 if vm_name in SETTINGS.settings['vm_expires']:
                     # compare date
                     logger.debug(
-                        f"{vm_name}|{datetime.now()}|{dict_current_vbk_with_date[vm_name]}|{(datetime.now() - dict_current_vbk_with_date[vm_name]).days}|{SETTINGS.settings['vm_expires'][vm_name]}")
-                    if (datetime.now() - dict_current_vbk_with_date[vm_name]).days > SETTINGS.settings['vm_expires'][
-                        vm_name]:
+                        f"{vm_name}|"
+                        f"{datetime.now()}|"
+                        f"{dict_current_vbk_with_date[vm_name]}|"
+                        f"{(datetime.now() - dict_current_vbk_with_date[vm_name]).days}|"
+                        f"{SETTINGS.settings['vm_expires'][vm_name]}")
+                    if (datetime.now() - dict_current_vbk_with_date[vm_name]).days > \
+                            SETTINGS.settings['vm_expires'][vm_name]:
                         list_expired.append(vm_name)
                         report.append(f"{vm_name} - !!! backup expired !!!")
                     else:
@@ -172,14 +186,15 @@ if __name__ == "__main__":
                 list_no_backup.append(vm_name)
                 report.append(f"{vm_name} - !!! not backup !!!")
 
-    # Report
-    if not list_no_backup and not list_expired:
+    # Report to email
+    if not list_no_backup and not list_expired and not list_backup_vm_no_longer_exist:
         logger.info("All lists empty.")
     else:
-        text_of_report = get_report()
+        text_of_report = get_email_report(list_no_backup, list_expired, list_backup_vm_no_longer_exist, report)
         # Send report
         receiver_emails = SETTINGS.settings['recipient_emails']
         subject = "ControlVeeamBackup"
         attached_file = logger.handlers[0].baseFilename
         send_email(receiver_emails, subject, text_of_report, logger, attached_file)
+
     logger.info(">>>> END ControlVeeamBackup >>>>")
