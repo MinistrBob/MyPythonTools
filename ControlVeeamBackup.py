@@ -91,6 +91,34 @@ def get_list_current_vms():
     return _list_current_vms
 
 
+def get_report():
+    global list_no_backup, list_expired, report, text_of_report
+    # Sort all lists
+    list_no_backup.sort()
+    list_expired.sort()
+    report.sort()
+    logger.debug(f"list_no_backup=\n{list_no_backup}")
+    logger.debug(f"list_expired=\n{list_expired}")
+    logger.debug(f"report=\n{report}")
+    # Preparing of report
+    list_no_backup = pprint.pformat(list_no_backup)
+    list_expired = pprint.pformat(list_expired)
+    report = pprint.pformat(report)
+    _text_of_report = "=" * 80 + \
+                      "\nList of virtual machines that have not been backed up\n" + \
+                      "=" * 80 + \
+                      f"\n{list_no_backup}\n" + \
+                      "=" * 80 + \
+                      "\nList of virtual machines whose backups are expired\n" + \
+                      "=" * 80 + \
+                      f"\n{list_expired}\n" + \
+                      "=" * 80 + \
+                      "\nFinal complete list\n" + \
+                      "=" * 80 + \
+                      f"\n{report}\n"
+    return _text_of_report
+
+
 if __name__ == "__main__":
     logger.info(">>>> BEGIN ControlVeeamBackup >>>>")
 
@@ -108,6 +136,7 @@ if __name__ == "__main__":
     except:
         logger.error(traceback.format_exc())
         exit(1)
+
     # Get list current VMs from ESXi
     logger.info("Get list current VMs from ESXi")
     try:
@@ -115,6 +144,7 @@ if __name__ == "__main__":
     except:
         logger.error(traceback.format_exc())
         exit(1)
+
     # Checking process
     logger.info("Checking process")
     list_no_backup = []  # Separate list of virtual machines that have not been backed up. For convenience.
@@ -141,32 +171,12 @@ if __name__ == "__main__":
                 # List of virtual machines that have not been backed up
                 list_no_backup.append(vm_name)
                 report.append(f"{vm_name} - !!! not backup !!!")
+
+    # Report
     if not list_no_backup and not list_expired:
         logger.info("All lists empty.")
     else:
-        # Sort all lists
-        list_no_backup.sort()
-        list_expired.sort()
-        report.sort()
-        logger.debug(f"list_no_backup=\n{list_no_backup}")
-        logger.debug(f"list_expired=\n{list_expired}")
-        logger.debug(f"report=\n{report}")
-        # Preparing of report
-        list_no_backup = pprint.pformat(list_no_backup)
-        list_expired = pprint.pformat(list_expired)
-        report = pprint.pformat(report)
-        text_of_report = "=" * 80 + \
-                         "\nList of virtual machines that have not been backed up\n" + \
-                         "=" * 80 + \
-                         f"\n{list_no_backup}\n" + \
-                         "=" * 80 + \
-                         "\nList of virtual machines whose backups are expired\n" + \
-                         "=" * 80 + \
-                         f"\n{list_expired}\n" + \
-                         "=" * 80 + \
-                         "\nFinal complete list\n" + \
-                         "=" * 80 + \
-                         f"\n{report}\n"
+        text_of_report = get_report()
         # Send report
         receiver_emails = SETTINGS.settings['recipient_emails']
         subject = "ControlVeeamBackup"
