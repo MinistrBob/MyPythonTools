@@ -121,23 +121,26 @@ if __name__ == "__main__":
     list_expired = []  # Seperate List of virtual machines whose backups are expired. For convenience.
     report = []  # Final complete list.
     for vm_name in list_current_vms:
-        if vm_name in dict_current_vbk_with_date:
-            # List of virtual machines whose backups are expired
-            pass  # проверка древности
-            if vm_name in SETTINGS.settings['vm_expires']:
-                # compare date
-                logger.debug(f"{vm_name}|{datetime.now()}|{dict_current_vbk_with_date[vm_name]}|{(datetime.now() - dict_current_vbk_with_date[vm_name]).days}|{SETTINGS.settings['vm_expires'][vm_name]}")
-                if (datetime.now() - dict_current_vbk_with_date[vm_name]).days > SETTINGS.settings['vm_expires'][vm_name]:
-                    list_expired.append(vm_name)
-                    report.append(f"{vm_name} - !!! backup expired !!!")
+        # exclude vm from vm_exclude_list
+        if vm_name not in SETTINGS.settings['vm_exclude_list']:
+            if vm_name in dict_current_vbk_with_date:
+                # List of virtual machines whose backups are expired
+                if vm_name in SETTINGS.settings['vm_expires']:
+                    # compare date
+                    logger.debug(
+                        f"{vm_name}|{datetime.now()}|{dict_current_vbk_with_date[vm_name]}|{(datetime.now() - dict_current_vbk_with_date[vm_name]).days}|{SETTINGS.settings['vm_expires'][vm_name]}")
+                    if (datetime.now() - dict_current_vbk_with_date[vm_name]).days > SETTINGS.settings['vm_expires'][
+                        vm_name]:
+                        list_expired.append(vm_name)
+                        report.append(f"{vm_name} - !!! backup expired !!!")
+                    else:
+                        report.append(vm_name)  # = OK
                 else:
-                    report.append(vm_name)  # = OK
+                    report.append(f"{vm_name} - not set expired date")
             else:
-                report.append(f"{vm_name} - not set expired date")
-        else:
-            # List of virtual machines that have not been backed up
-            list_no_backup.append(vm_name)
-            report.append(f"{vm_name} - !!! not backup !!!")
+                # List of virtual machines that have not been backed up
+                list_no_backup.append(vm_name)
+                report.append(f"{vm_name} - !!! not backup !!!")
     if not list_no_backup and not list_expired:
         logger.info("All lists empty.")
     else:
