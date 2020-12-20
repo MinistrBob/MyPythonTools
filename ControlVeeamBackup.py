@@ -42,20 +42,34 @@ def get_vm_name(vm, depth=1):
     return vm.summary.config.name
 
 
-def get_list_current_vbk():
-    if not os.path.exists(SETTINGS.settings['backup_dir']):
-        msg = f"Path backup_dir={SETTINGS.settings['backup_dir']} does not exist"
+def get_list_current_vbk(backup_dir_):
+    if not os.path.exists(backup_dir_):
+        msg = f"Path backup_dir={backup_dir_} does not exist"
         print(msg)
         logger.error(msg)
         exit(1)
-    (_, _, filenames) = next(os.walk(SETTINGS.settings['backup_dir']))
-    logger.debug(f"filenames=\n{filenames}")
+    (_, _, vbk_files) = next(os.walk(backup_dir_))
+    logger.debug(f"vbk_files=\n{vbk_files}")
     logger.info("VBK list processing")
-    # _list_current_vbk = [filename[:-16][:-11] for filename in filenames]
+    # _list_current_vbk = [vbk_file[:-16][:-11] for vbk_file in vbk_files]
     # logger.debug(_list_current_vbk)
-    _dict_current_vbk_with_date = {filename[:-16][:-11]: datetime.strptime(filename[:-16][-10:], '%Y-%m-%d') for
-                                   filename
-                                   in filenames if filename.endswith('.vbk')}
+    # _dict_current_vbk_with_date = {vbk_file[:-16][:-11]: datetime.strptime(vbk_file[:-16][-10:], '%Y-%m-%d') for
+    #                                vbk_file
+    #                                in vbk_files if vbk_file.endswith('.vbk')}
+    _dict_current_vbk_with_date = {}
+    for vbk_file in vbk_files:
+        if vbk_file.endswith('.vbk'):  # обрабатываем только vbk файлы
+            vbk_vm_name = vbk_file[:-16][:-11]  # type: str
+            vbk_create_date = datetime.strptime(vbk_file[:-16][-10:], '%Y-%m-%d')  # type: datetime
+            if vbk_vm_name in _dict_current_vbk_with_date:
+                # такая резервная копия уже есть,
+                # нужно обработать дату (остаётся самая последняя дата)
+                # и увеличить счётчик копий
+                if vbk_create_date > _dict_current_vbk_with_date[vbk_vm_name][0]:
+                    _dict_current_vbk_with_date[vbk_vm_name][0] = vbk_create_date
+                _dict_current_vbk_with_date[vbk_vm_name][1] = _dict_current_vbk_with_date[vbk_vm_name][1] + 1
+            else:
+                _dict_current_vbk_with_date[vbk_vm_name] = [vbk_create_date, 1]
     logger.debug(f"_dict_current_vbk_with_date=\n{_dict_current_vbk_with_date}")
     return _dict_current_vbk_with_date
 
@@ -137,14 +151,16 @@ if __name__ == "__main__":
 
     # Get list current backup files from disk
     logger.info("Get list current backup files from disk")
+    dict_current_vbk_with_date = {}
     try:
-        dict_current_vbk_with_date = get_list_current_vbk()
+        dict_current_vbk_with_date = get_list_current_vbk(SETTINGS.settings['backup_dir'])
     except:
         logger.error(traceback.format_exc())
         exit(1)
 
     # Get list current VMs from ESXi
     logger.info("Get list current VMs from ESXi")
+    list_current_vms = []
     try:
         list_current_vms = get_list_current_vms()
     except:
@@ -158,7 +174,7 @@ if __name__ == "__main__":
     # Checking process
     logger.info("Checking process")
     list_no_backup = []  # Separate list of virtual machines that have not been backed up. For convenience.
-    list_expired = []  # Seperate List of virtual machines whose backups are expired. For convenience.
+    list_expired = []  # Separate List of virtual machines whose backups are expired. For convenience.
     report = []  # Final complete list.
     for vm_name in list_current_vms:
         # exclude vm from vm_exclude_list
@@ -167,13 +183,14 @@ if __name__ == "__main__":
                 # List of virtual machines whose backups are expired
                 if vm_name in SETTINGS.settings['vm_expires']:
                     # compare date
+                    backup_date = dict_current_vbk_with_date[vm_name][0]  # type: datetime
                     logger.debug(
                         f"{vm_name}|"
                         f"{datetime.now()}|"
-                        f"{dict_current_vbk_with_date[vm_name]}|"
-                        f"{(datetime.now() - dict_current_vbk_with_date[vm_name]).days}|"
+                        f"{backup_date}|"
+                        f"{(datetime.now() - backup_date).days}|"
                         f"{SETTINGS.settings['vm_expires'][vm_name]}")
-                    if (datetime.now() - dict_current_vbk_with_date[vm_name]).days > \
+                    if (datetime.now() - backup_date).days > \
                             SETTINGS.settings['vm_expires'][vm_name]:
                         list_expired.append(vm_name)
                         report.append(f"{vm_name} - !!! backup expired !!!")
