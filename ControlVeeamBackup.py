@@ -15,31 +15,39 @@ program_file = os.path.realpath(__file__)
 logger = custom_logger.get_logger(program_file=program_file)
 
 
-def get_vm_name(vm, depth=1):
+def get_vm_info(vm_name_, depth=1):
     """ Print information for a particular virtual machine or recurse into a folder or vApp with depth protection """
     maxdepth = 10
 
     # if this is a group it will have children. if it does, recurse into them
     # and then return
-    if hasattr(vm, 'childEntity'):
+    if hasattr(vm_name_, 'childEntity'):
         if depth > maxdepth:
             return
-        vmList = vm.childEntity
+        vmList = vm_name_.childEntity
         for c in vmList:
-            get_vm_name(c, depth + 1)
+            get_vm_info(c, depth + 1)
         return
 
     # if this is a vApp, it likely contains child VMs
     # (vApps can nest vApps, but it is hardly a common usecase, so ignore that)
-    if isinstance(vm, vim.VirtualApp):
-        vmList = vm.vm
+    if isinstance(vm_name_, vim.VirtualApp):
+        vmList = vm_name_.vm
         for c in vmList:
-            get_vm_name(c, depth + 1)
+            get_vm_info(c, depth + 1)
         return
 
-    # summary = vm.summary
-    # print("Name       : ", summary.config.name)
-    return vm.summary.config.name
+    summary = vm_name_.summary
+    vm = {'name': summary.config.name,
+          'power_state': summary.runtime.powerState.replace('poweredOn', 'ON')}
+    if summary.guest is not None:
+        if summary.guest.hostName is not None:
+            vm['guest_name'] = summary.guest.hostName
+        ip = summary.guest.ipAddress
+        if ip is not None and ip != "":
+            vm['guest_ip'] = ip
+
+    return vm
 
 
 def get_list_current_vbk(backup_dir_):
@@ -90,17 +98,20 @@ def get_list_current_vms():
     atexit.register(Disconnect, si)
 
     content = si.RetrieveContent()
-    _list_current_vms = []
+    _list_current_vms = {}
     for child in content.rootFolder.childEntity:
         if hasattr(child, 'vmFolder'):
             datacenter = child
             vmFolder = datacenter.vmFolder
             vmList = vmFolder.childEntity
-            for vm in vmList:
-                _list_current_vms.append(get_vm_name(vm))
+            for real_vm in vmList:
+                vm_ = get_vm_info(real_vm)
+                if vm_ is not None:
+                    # print(f"type={type(vm_)}|vm_={vm_}")
+                    _list_current_vms[vm_['name']] = vm_
     # Filter None
-    not_none_list = filter(None.__ne__, _list_current_vms)
-    _list_current_vms = list(not_none_list)
+    # not_none_list = filter(None.__ne__, _list_current_vms)
+    # _list_current_vms = list(not_none_list)
     logger.debug(f"_list_current_vms=\n{_list_current_vms}")
     return _list_current_vms
 
@@ -175,8 +186,8 @@ if __name__ == "__main__":
     logger.info("Checking process")
     list_no_backup = []  # Separate list of virtual machines that have not been backed up. For convenience.
     list_expired = []  # Separate List of virtual machines whose backups are expired. For convenience.
-    report = []  # Final complete list.
-    for vm_name in list_current_vms:
+    report = []  # Final complete table. type: str
+    for vm_name in list_current_vms:  # type: str, list
         # exclude vm from vm_exclude_list
         if vm_name not in SETTINGS.settings['vm_exclude_list']:
             if vm_name in dict_current_vbk_with_date:
@@ -197,11 +208,11 @@ if __name__ == "__main__":
                     else:
                         report.append(vm_name)  # = OK
                 else:
-                    report.append(f"{vm_name} - not set expired date")
+                    report.append(f"{vm_name} - _you_need_set_expired_date_setting_")
             else:
                 # List of virtual machines that have not been backed up
                 list_no_backup.append(vm_name)
-                report.append(f"{vm_name} - !!! not backup !!!")
+                report.append(f"{vm_name} - !!! no backup !!!")
 
     # Report to email
     if not list_no_backup and not list_expired and not list_backup_vm_no_longer_exist:

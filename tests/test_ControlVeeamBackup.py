@@ -3,23 +3,7 @@ import os
 import shutil
 from tempfile import gettempdir
 from datetime import datetime
-from ControlVeeamBackup import get_list_current_vbk
-
-
-def delete_dir(dir_name):
-    for root, dirs, files in os.walk(dir_name, topdown=False):
-        for name in files:
-            try:
-                os.remove(os.path.join(root, name))
-            except OSError:
-                print(f"Delete file {os.path.join(root, name)} failed")
-                exit(1)
-        for name in dirs:
-            try:
-                os.rmdir(os.path.join(root, name))
-            except OSError:
-                print(f"Delete folder {os.path.join(root, name)} failed")
-                exit(1)
+from ControlVeeamBackup import get_list_current_vbk, get_list_current_vms
 
 
 class TestControlVeeamBackup(unittest.TestCase):
@@ -69,6 +53,9 @@ class TestControlVeeamBackup(unittest.TestCase):
     def test_get_list_current_vbk(self):
         # print(self.temp_folder)
         self.assertEqual(get_list_current_vbk(self.temp_folder), self.result_filename)
+
+    def test_get_list_current_vms(self):
+        self.assertTrue(type(get_list_current_vms()) is dict)
 
 
 if __name__ == '__main__':
