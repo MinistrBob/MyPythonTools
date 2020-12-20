@@ -39,7 +39,7 @@ def get_vm_info(vm_name_, depth=1):
 
     summary = vm_name_.summary
     vm = {'name': summary.config.name,
-          'power_state': summary.runtime.powerState.replace('poweredOn', 'ON')}
+          'power_state': summary.runtime.powerState.replace('poweredOn', 'ON').replace('poweredOff', 'OFF')}
     if summary.guest is not None:
         if summary.guest.hostName is not None:
             vm['guest_name'] = summary.guest.hostName
@@ -121,7 +121,7 @@ def get_email_report(list_no_backup_, list_expired_, list_backup_vm_no_longer_ex
     list_no_backup_.sort()
     list_expired_.sort()
     list_backup_vm_no_longer_exist_.sort()
-    report_.sort()
+    # report_.sort()
     logger.debug(f"list_no_backup=\n{list_no_backup_}")
     logger.debug(f"list_expired=\n{list_expired_}")
     logger.debug(f"list_backup_vm_no_longer_exist_=\n{list_backup_vm_no_longer_exist_}")
@@ -130,7 +130,7 @@ def get_email_report(list_no_backup_, list_expired_, list_backup_vm_no_longer_ex
     list_no_backup_ = pprint.pformat(list_no_backup_)
     list_expired_ = pprint.pformat(list_expired_)
     list_backup_vm_no_longer_exist_ = pprint.pformat(list_backup_vm_no_longer_exist_)
-    report_ = pprint.pformat(report_)
+    # report_ = pprint.pformat(report_)
     _text_of_report = "=" * 80 + \
                       "\nList of virtual machines that have not been backed up\n" + \
                       "=" * 80 + \
@@ -148,6 +148,28 @@ def get_email_report(list_no_backup_, list_expired_, list_backup_vm_no_longer_ex
                       "=" * 80 + \
                       f"\n{report_}\n"
     return _text_of_report
+
+
+separator = "-" * 21 + "-" * 5 + "-" * 15 + "-" * 5 + "-" * 25 + "-" * 30
+
+
+def format_table_string(vm_, count_, desc):
+    # name 21, count 5, desc 15, power 5, guest_ip 13, guest_name 25
+    table_string = f"{vm_['name']:<21}|" \
+                   f"{count_:^5}|" \
+                   f"{desc:^15}|" \
+                   f"{vm_['power_state']:^5}"
+    if SETTINGS.settings['detailed_information']:
+        try:
+            table_string += f"|{vm_['guest_ip']:<25}|"
+        except KeyError:
+            table_string += f"|{'no ip':<25}|"
+        try:
+            table_string += f"{vm_['guest_name']:<30}|"
+        except KeyError:
+            table_string += f"{'noname':<30}|"
+    table_string += "\n" + separator + "\n"
+    return table_string
 
 
 if __name__ == "__main__":
@@ -169,9 +191,9 @@ if __name__ == "__main__":
         logger.error(traceback.format_exc())
         exit(1)
 
-    # Get list current VMs from ESXi
-    logger.info("Get list current VMs from ESXi")
-    list_current_vms = []
+    # Get dict current VMs from ESXi
+    logger.info("Get dict current VMs from ESXi")
+    list_current_vms = {}
     try:
         list_current_vms = get_list_current_vms()
     except:
@@ -186,8 +208,18 @@ if __name__ == "__main__":
     logger.info("Checking process")
     list_no_backup = []  # Separate list of virtual machines that have not been backed up. For convenience.
     list_expired = []  # Separate List of virtual machines whose backups are expired. For convenience.
-    report = []  # Final complete table. type: str
-    for vm_name in list_current_vms:  # type: str, list
+
+    # Final complete table. type: str
+    report = f"{'NAME':^21}|" \
+             f"{'COUNT':^5}|" \
+             f"{'DESCRIPTION':^15}|" \
+             f"{'POWER':^5}"
+    if SETTINGS.settings['detailed_information']:
+        report += f"|{'IP':^25}|" \
+                  f"{'GUEST NAME':^30}"
+    report += "\n" + separator + "\n"
+
+    for vm_name in sorted(list_current_vms.keys()):  # type: str, dict
         # exclude vm from vm_exclude_list
         if vm_name not in SETTINGS.settings['vm_exclude_list']:
             if vm_name in dict_current_vbk_with_date:
@@ -204,15 +236,22 @@ if __name__ == "__main__":
                     if (datetime.now() - backup_date).days > \
                             SETTINGS.settings['vm_expires'][vm_name]:
                         list_expired.append(vm_name)
-                        report.append(f"{vm_name} - !!! backup expired !!!")
+                        report += (format_table_string(list_current_vms[vm_name],
+                                                       dict_current_vbk_with_date[vm_name][1],
+                                                       " expired "))
                     else:
-                        report.append(vm_name)  # = OK
+                        # = OK
+                        report += (format_table_string(list_current_vms[vm_name],
+                                                       dict_current_vbk_with_date[vm_name][1],
+                                                       ""))
                 else:
-                    report.append(f"{vm_name} - _you_need_set_expired_date_setting_")
+                    report += (format_table_string(list_current_vms[vm_name],
+                                                   dict_current_vbk_with_date[vm_name][1],
+                                                   "_you_need_set_expired_date_setting_"))
             else:
                 # List of virtual machines that have not been backed up
                 list_no_backup.append(vm_name)
-                report.append(f"{vm_name} - !!! no backup !!!")
+                report += (format_table_string(list_current_vms[vm_name], 0, " no backup "))
 
     # Report to email
     if not list_no_backup and not list_expired and not list_backup_vm_no_longer_exist:
