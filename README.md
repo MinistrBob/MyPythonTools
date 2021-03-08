@@ -23,6 +23,9 @@ python ControlVeeamBackup.py
 ### K8S_Images.py
 Парсинг описания подов кластера kubernetes в формате json (kubectl get pods -o json > all_pods_in_json.json).  
 
+### gitlab_app.py
+Работа с GitLab в частности получение списка самых последних образов (тэгов).  
+
 ## FOR DEVELOPER
 ### Get requirements
 ```

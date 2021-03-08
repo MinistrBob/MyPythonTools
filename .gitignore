@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 SETTINGS.py
-SETTINGS.py
 test.py
+text.txt
+gitlab_app_conf.py
