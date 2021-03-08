@@ -20,6 +20,9 @@ python ControlVeeamBackup.py
 Примеры использования - http://vmware.github.io/pyvmomi-community-samples. Но здесь могут быть устаревшие примеры.
 Рабочий пример getallvms.py взял из - https://github.com/vmware/pyvmomi/tree/master/sample.  
 
+### K8S_Images.py
+Парсинг описания подов кластера kubernetes в формате json (kubectl get pods -o json > all_pods_in_json.json).  
+
 ## FOR DEVELOPER
 ### Get requirements
 ```
