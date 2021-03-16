@@ -126,10 +126,10 @@ if __name__ == '__main__':
     # my_gitlab.print_list_project_repositories(conf.project_dict["rostourism-images"])
 
     # Список тэгов в проекте
-    repositories = my_gitlab.get_list_project_repositories(conf.project_dict["rostourism-registry-backend"])
-    for repo in repositories:
-        print(repo)
-        my_gitlab.print_list_repository_tags(repo, full=True, indent=4)
+    # repositories = my_gitlab.get_list_project_repositories(conf.project_dict["rostourism-registry-backend"])
+    # for repo in repositories:
+    #     print(repo)
+    #     my_gitlab.print_list_repository_tags(repo, full=True, indent=4)
 
     # Список самых последних тэгов в проекте
     # my_gitlab.print_max_tags_in_project(conf.project_dict["rostourism-registry-backend"])
