@@ -23,7 +23,7 @@ def k8s_get_list_set_images(suffix, path):
                     if container_name.startswith("russia-travel"):
                         kind_name = container_name
                     else:
-                        kind_name = item["metadata"]["name"].split('-dev-')[0] + suffix
+                        kind_name = item["metadata"]["name"].split('-dev-')[0] + "-" + suffix
                         if kind_name.startswith("instagram-loader-"):
                             kind = "CronJob"
                             if kind_name in unique_kind_name:
@@ -48,13 +48,15 @@ def k8s_get_list_set_images(suffix, path):
 
 
 def set_settings():
+    # print(sys.argv[1:])
     # env_suffix_ = "-staging"
-    env_suffix_ = "-dev"
+    env_suffix_ = "dev"
     base_path_ = r'c:\!SAVE'
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 1:
         env_suffix_ = sys.argv[1]
-    if len(sys.argv) > 3:
+    if len(sys.argv) > 2:
         base_path_ = sys.argv[2]
+    # print(env_suffix_, base_path_)
     return env_suffix_, base_path_
 
 

@@ -1,5 +1,7 @@
 #!/bin/env bash
-set -euo pipefail
 
-kubectl get pods -n rostourism -o=json > $HOME/all_pods_in_json.json
-python3 k8s_get_set_images.py &1 &2 2>&1 | tee $HOME/update_&1.sh
+set -euov pipefail
+# echo "PREFIX=$1"
+# echo "BASE_PATH=$2"
+kubectl get pods -n rostourism -o=json > $2/all_pods_in_json.json
+python3 k8s_get_set_images.py $1 $2 | tee $2/update.sh
