@@ -1,5 +1,6 @@
 import json
 import sys
+import os
 
 
 def k8s_get_list_set_images(suffix, path):
@@ -49,14 +50,15 @@ def k8s_get_list_set_images(suffix, path):
 def set_settings():
     # env_suffix_ = "-staging"
     env_suffix_ = "-dev"
-    json_file_path_ = r'c:\!SAVE\all_pods_in_json.json'
+    base_path_ = r'c:\!SAVE'
     if len(sys.argv) > 2:
         env_suffix_ = sys.argv[1]
     if len(sys.argv) > 3:
-        json_file_path_ = sys.argv[2]
-    return env_suffix_, json_file_path_
+        base_path_ = sys.argv[2]
+    return env_suffix_, base_path_
 
 
 if __name__ == '__main__':
-    env_suffix, json_file_path = set_settings()
+    env_suffix, base_path = set_settings()
+    json_file_path = os.path.join(base_path, 'all_pods_in_json.json')
     k8s_get_list_set_images(env_suffix, json_file_path)
