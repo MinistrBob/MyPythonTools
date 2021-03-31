@@ -25,7 +25,8 @@ python ControlVeeamBackup.py
 **ENG**: Parsing the description of pods of the kubernetes cluster in json format (`kubectl get pods -o json> all_pods_in_json.json`) and getting the `kubectl set images` command set.  
 ```
 # Install
-sudo cp -v ~/k8s_get_set_images.* /usr/local/bin
+cd /.../<git path>
+sudo cp -v k8s_get_set_images.sh k8s_get_set_images.py /usr/local/bin
 sudo chmod +x /usr/local/bin/k8s_get_set_images.sh
 
 # Execute
