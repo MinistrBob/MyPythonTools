@@ -23,6 +23,14 @@ python ControlVeeamBackup.py
 ### k8s_get_set_images.*
 **RUS**: Парсинг описания подов кластера kubernetes в формате json (`kubectl get pods -o json > all_pods_in_json.json`) и получение набора команд `kubectl set images`.  
 **ENG**: Parsing the description of pods of the kubernetes cluster in json format (`kubectl get pods -o json> all_pods_in_json.json`) and getting the `kubectl set images` command set.  
+```
+# Install
+sudo cp -v ~/k8s_get_set_images.* /usr/local/bin
+sudo chmod +x /usr/local/bin/k8s_get_set_images.sh
+
+# Execute
+k8s_get_set_images.sh staging $HOME
+```
 
 ### gitlab_app.py
 Работа с GitLab в частности получение списка самых последних образов (тэгов).  
