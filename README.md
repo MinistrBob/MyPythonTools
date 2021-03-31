@@ -21,7 +21,7 @@ python ControlVeeamBackup.py
 Рабочий пример getallvms.py взял из - https://github.com/vmware/pyvmomi/tree/master/sample.  
 
 ### k8s_get_set_images.*
-RUS: Парсинг описания подов кластера kubernetes в формате json (`kubectl get pods -o json > all_pods_in_json.json`)` и получение набора команд `kubectl set images`.  
+RUS: Парсинг описания подов кластера kubernetes в формате json (`kubectl get pods -o json > all_pods_in_json.json`) и получение набора команд `kubectl set images`.  
 ENG: Parsing the description of pods of the kubernetes cluster in json format (`kubectl get pods -o json> all_pods_in_json.json`) and getting the `kubectl set images` command set.  
 
 ### gitlab_app.py
