@@ -28,6 +28,7 @@ python ControlVeeamBackup.py
 cd /.../<git path>
 sudo cp -v k8s_get_set_images.sh k8s_get_set_images.py /usr/local/bin
 sudo chmod +x /usr/local/bin/k8s_get_set_images.sh
+sudo chmod +x /usr/local/bin/k8s_get_set_images.py
 
 # Execute
 k8s_get_set_images.sh staging $HOME
