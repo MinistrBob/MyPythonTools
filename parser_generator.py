@@ -17,6 +17,21 @@ def mongo1(base_path):
                 end='')
 
 
+def copy_picture():
+    """
+    Генерация команд для копирования картинок
+    :return:
+    """
+    txt_file = open('text3.txt', 'r')
+    # lines = txt_file.readlines()
+    lines = txt_file.read().splitlines()
+    for line in lines:
+        # print(line, end='')
+        line = line.split('/')
+        print(f"xcopy h:\\RT\\uf\\{line[2]}\\{line[3]} \\\\172.26.12.60\\upload\\uf\\{line[2]}\\{line[3]}\n", end='')
+
+
 if __name__ == '__main__':
     stub()
-    mongo1('/bitnami/mongodb/data/export-folder')
+    # mongo1('/bitnami/mongodb/data/export-folder')
+    # copy_picture()
