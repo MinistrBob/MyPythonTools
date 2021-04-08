@@ -11,9 +11,10 @@ def mongo1(base_path):
     lines = txt_file.readlines()
     for line in lines:
         # print(line, end='')
-        print(
-            f"mongoimport --authenticationDatabase admin --username root --password P@ssw0rds --db objects --collection obj_{line.split('.')[0]}_history {base_path}/{line}",
-            end='')
+        if line.endswith(".json\n"):
+            print(
+                f"mongoimport --authenticationDatabase admin --username root --password P@ssw0rds --drop --db objects --collection obj_{line.split('.')[0]}_history {base_path}/{line}",
+                end='')
 
 
 if __name__ == '__main__':
