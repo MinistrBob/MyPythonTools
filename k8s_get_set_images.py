@@ -21,6 +21,8 @@ def k8s_get_list_set_images(suffix, path):
                 if image.startswith("registry.gitlab.com"):
                     kind = "deployment"
                     container_name = container["name"]
+                    if container_name.startswith("tool"):
+                        continue
                     if container_name.startswith("russia-travel"):
                         kind_name = container_name
                     else:
