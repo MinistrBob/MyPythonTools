@@ -34,7 +34,26 @@ def copy_picture():
         print(f"xcopy h:\\RT\\uf\\{line[2]}\\{line[3]} \\\\172.26.12.60\\upload\\uf\\{line[2]}\\{line[3]}\n", end='')
 
 
+def get_images_for_prod():
+    """
+    Генерация команд для закачки docker images для prod
+    k get deploy -l app.kubernetes.io/component=services | awk '{print $1}' | sort | xargs kubectl describe deploy | grep Image:
+    :return:
+    """
+    txt_file = open('text4.txt', 'r')
+    # lines = txt_file.readlines()
+    lines = txt_file.read().splitlines()
+    print("#!/bin/env bash")
+    for line in lines:
+        image_name = line.split('/')[-1]
+        print(f"docker pull {line}\n", end='')
+        print(f"docker tag {line} localhost:5000/{image_name}\n", end='')
+        print(f"docker push localhost:5000/{image_name}\n", end='')
+        print("\n", end='')
+
+
 if __name__ == '__main__':
     stub()
     # mongo1('/bitnami/mongodb/data/import-folder')
     # copy_picture()
+    get_images_for_prod()
