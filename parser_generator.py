@@ -2,22 +2,42 @@ def stub():
     pass
 
 
-def mongo1(base_path, drop=True):
+def mongo1(base_path, drop=True, mode=False):
     """
     Генерация команд для импорта множества коллекций в mongo
+    --mode=<insert|upsert|merge|delete>
     :return:
     """
     txt_file = open('text2.txt', 'r')
     lines = txt_file.readlines()
+
     if drop:
         drop_sub = " --drop "
     else:
         drop_sub = " "
+
+    if mode:
+        if mode == "insert":
+            mode_sub = " --mode=insert "
+        elif mode == "upsert":
+            mode_sub = " --mode=upsert "
+        elif mode == "merge":
+            mode_sub = " --mode=merge "
+        elif mode == "delete":
+            mode_sub = " --mode=delete "
+        else:
+            raise Exception('Не правильно определён --mode')
+    else:
+        mode_sub = " "
+
     for line in lines:
         # print(line, end='')
         if line.endswith(".json\n"):
-            print(f"mongoimport --authenticationDatabase admin --username root --password P@ssw0rds{drop_sub}--db "
-                  f"objects --collection obj_{line.split('.')[0]}_history {base_path}/{line}", end='')
+            line = line.rstrip()
+            print(f"echo -e \"\\nImport {line}\" && "
+                  f"mongoimport --authenticationDatabase admin --username root --password P@ssw0rds{drop_sub}{mode_sub}"
+                  f" --db objects --collection obj_{line.split('.')[0]}_history {base_path}/{line} "
+                  f"2>&1 | tee {base_path}/{line}.import.log\n", end='')
 
 
 def copy_picture():
@@ -54,6 +74,7 @@ def get_images_for_prod():
 
 if __name__ == '__main__':
     stub()
-    # mongo1('/bitnami/mongodb/data/import-folder')
+    # --mode = < False | insert | upsert | merge | delete > #
+    mongo1('/bitnami/mongodb/data/import-folder', drop=False, mode='merge')
     # copy_picture()
-    get_images_for_prod()
+    # get_images_for_prod()
