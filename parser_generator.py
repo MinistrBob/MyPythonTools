@@ -28,7 +28,7 @@ def mongo1(base_path, drop=True, mode=False):
         else:
             raise Exception('Не правильно определён --mode')
     else:
-        mode_sub = " "
+        mode_sub = ""
 
     for line in lines:
         # print(line, end='')
@@ -75,6 +75,7 @@ def get_images_for_prod():
 if __name__ == '__main__':
     stub()
     # --mode = < False | insert | upsert | merge | delete > #
-    mongo1('/bitnami/mongodb/data/import-folder', drop=False, mode='merge')
+    # mongo1('/bitnami/mongodb/data/import-folder', drop=False, mode='merge')
+    mongo1('/bitnami/mongodb/data/import-folder', drop=True)
     # copy_picture()
     # get_images_for_prod()
