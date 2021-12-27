@@ -77,14 +77,14 @@ def PrintVmInfo(vm, depth=1):
     print("Path       : ", summary.config.vmPathName)
     print("Guest      : ", summary.config.guestFullName)
     annotation = summary.config.annotation
-    if annotation != None and annotation != "":
+    if annotation is not None and annotation != "":
         print("Annotation : ", annotation)
     print("State      : ", summary.runtime.powerState)
-    if summary.guest != None:
+    if summary.guest is not None:
         ip = summary.guest.ipAddress
-        if ip != None and ip != "":
+        if ip is not None and ip != "":
             print("IP         : ", ip)
-    if summary.runtime.question != None:
+    if summary.runtime.question is not None:
         print("Question  : ", summary.runtime.question.text)
     print("")
 
@@ -120,10 +120,10 @@ def main():
     for child in content.rootFolder.childEntity:
         if hasattr(child, 'vmFolder'):
             datacenter = child
-            vmFolder = datacenter.vmFolder
-            vmList = vmFolder.childEntity
-            for vm in vmList:
-                PrintVmInfo(vm)
+            vm_folder = datacenter.vmFolder
+            vm_list = vm_folder.childEntity
+            for vm in vm_list:
+                 PrintVmInfo(vm)
     return 0
 
 

@@ -16,12 +16,19 @@ python ControlVeeamBackup.py
 
 ### WMWare
 Программы для VMWare.  
+pyvmomi: [vmware / pyvmomi](https://github.com/vmware/pyvmomi)
+Примеры от VMWare: [vmware / pyvmomi-community-samples](https://github.com/vmware/pyvmomi-community-samples)
+Документация по API: [vSphere WS SDK API Docs](https://code.vmware.com/apis/968/vsphere)
+VMware vSphere Automation SDK for Python: [vmware / vsphere-automation-sdk-python]
+
 ```cmd
 cd C:\MyGit\MyPythonTools\VMWare
 c:\MyGit\MyPythonTools\VMWare\venv\Scripts\activate.bat
 pip install --upgrade pyvmomi
 pip freeze | Out-File -Encoding UTF8 c:\MyGit\MyPythonTools\VMWare\requirements.txt
 ```
+
+
 
 ### ControlVeeamBackup.py
 Программа контролирует сделанные резервные копии VMWare ESXi VMs c помощью VeeamBackup. Сообщает администратору о наличие виртуальных машин у которых нет ни одной резервной копии или резервная копия слишком старая.  
