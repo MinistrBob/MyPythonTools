@@ -44,10 +44,11 @@ def GetArgs():
     parser.add_argument('-p', '--password', required=False, action='store',
                         help='Password to use when connecting to host')
     args = parser.parse_args()
+    # print(args)
     return args
 
 
-def PrintVmInfo(vm, depth=1):
+def PrintVmInfo(vm, depth=1, report_type='report'):
     """
    Print information for a particular virtual machine or recurse into a folder
    or vApp with depth protection
@@ -61,7 +62,7 @@ def PrintVmInfo(vm, depth=1):
             return
         vmList = vm.childEntity
         for c in vmList:
-            PrintVmInfo(c, depth + 1)
+            PrintVmInfo(c, depth + 1, report_type=report_type)
         return
 
     # if this is a vApp, it likely contains child VMs
@@ -69,24 +70,39 @@ def PrintVmInfo(vm, depth=1):
     if isinstance(vm, vim.VirtualApp):
         vmList = vm.vm
         for c in vmList:
-            PrintVmInfo(c, depth + 1)
+            PrintVmInfo(c, depth + 1, report_type=report_type)
         return
 
-    summary = vm.summary
-    print("Name       : ", summary.config.name)
-    print("Path       : ", summary.config.vmPathName)
-    print("Guest      : ", summary.config.guestFullName)
-    annotation = summary.config.annotation
-    if annotation is not None and annotation != "":
-        print("Annotation : ", annotation)
-    print("State      : ", summary.runtime.powerState)
-    if summary.guest is not None:
-        ip = summary.guest.ipAddress
-        if ip is not None and ip != "":
-            print("IP         : ", ip)
-    if summary.runtime.question is not None:
-        print("Question  : ", summary.runtime.question.text)
-    print("")
+    # Collect data
+    vm_dict = {
+        'vm_host': vm.summary.runtime.host.name,  # 172.26.12.8
+        'vm_ip': str(vm.summary.guest.ipAddress),  # 172.26.12.171
+        'vm_name': vm.summary.config.name,  # ic-dp-and-app
+        # 'vm_path': vm.summary.config.vmPathName,  # [datastore8] ic-dp-and-app/ic-dp-and-app.vmx
+        'vm_guest_fullname': vm.summary.config.guestFullName,  # Microsoft Windows Server 2016 or later (64-bit)
+        'vm_guest_id': str(vm.summary.guest.guestId),
+        'vm_guest_family': str(vm.guest.guestFamily),
+        'vm_guest_state': vm.guest.guestState,
+        # 'vm_annotation': vm.summary.config.annotation,  ### notes can be very long
+        'vm_state': vm.summary.runtime.powerState,  # poweredOn
+        'vm_question': str(vm.summary.runtime.question)
+    }
+
+    match report_type:
+        case 'report':
+            print("Name       : ", vm_dict['vm_name'])
+            print("Path       : ", vm_dict['vm_path'])
+            print("Guest      : ", vm_dict['vm_guest_fullname'])
+            print("Annotation : ", vm_dict['vm_annotation'])
+            print("State      : ", vm_dict['vm_state'])
+            print("IP         : ", vm_dict['vm_ip'])
+            print("Question   : ", vm_dict['vm_question'])
+            print("Host       : ", vm_dict['vm_host'])
+            print("")
+        case 'tab':
+            print('\t'.join(vm_dict.values()))
+
+    # exit(0)  # DEBUG
 
 
 def main():
@@ -123,7 +139,7 @@ def main():
             vm_folder = datacenter.vmFolder
             vm_list = vm_folder.childEntity
             for vm in vm_list:
-                 PrintVmInfo(vm)
+                PrintVmInfo(vm, report_type='tab')
     return 0
 
 

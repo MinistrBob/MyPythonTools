@@ -27,7 +27,10 @@ c:\MyGit\MyPythonTools\VMWare\venv\Scripts\activate.bat
 pip install --upgrade pyvmomi
 pip freeze | Out-File -Encoding UTF8 c:\MyGit\MyPythonTools\VMWare\requirements.txt
 ```
-
+Run program (in CMD use " in PyCharm console use '):
+```cmd
+C:\MyGit\MyPythonTools\VMWare\venv\Scripts\python.exe C:/MyGit/MyPythonTools/VMWare/getallvms.py -s 192.168.22.1 -u 'Administrator@xxx.local' -p 'strongPassword'
+```
 
 
 ### ControlVeeamBackup.py
