@@ -5,8 +5,9 @@
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/VMWare/venv" />
       <excludeFolder url="file://$MODULE_DIR$/Kubernetes/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/S3/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (MyPythonTools-VMWare)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (MyPythonTools-S3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">

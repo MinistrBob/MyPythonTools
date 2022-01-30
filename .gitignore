@@ -134,3 +134,4 @@ gitlab_app_conf.py
 /text2.txt
 text3.txt
 /text4.txt
+S3/secret.py
