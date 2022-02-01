@@ -1,4 +1,0 @@
-access_key = 'HO7PQOIUBPVCS5ZG6WHP'
-secret_key = 'DAnHBKIyJNpOWLRCLLCQYmKp0J41vo78INLT7rum'
-host = '172.26.12.77'
-port = 31111
