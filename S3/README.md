@@ -19,5 +19,6 @@ docker build . -t ministrbob/my-python-tools-s3:latest
 docker login --username XXX --password XXX
 docker push ministrbob/my-python-tools-s3:latest
 
+docker pull ministrbob/my-python-tools-s3:latest
 docker run -it --rm ministrbob/my-python-tools-s3:latest
 ```

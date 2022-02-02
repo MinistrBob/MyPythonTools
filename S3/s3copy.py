@@ -25,7 +25,8 @@ for key in bucket.list():
     cdate = '\t'.join(key.last_modified.split('T'))
     print(f"{key.name}\t{key.size}\t{cdate}")
     # persistent/1/41/365bff7a46b05f50447c6b3c7938751f0afe6e3c11fdd4c4b333a645dec47	34688	2021-02-04T15:38:46.521Z
-
+    # Получить объект
+    print(key.get_contents_as_string())
     # Download files
     # file_name = key.name.split('/')[-1] + ".jpg"
     # print(file_name)
