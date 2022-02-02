@@ -57,9 +57,9 @@ k8s_get_set_images.sh staging $HOME
 Работа с GitLab в частности получение списка самых последних образов (тэгов).  
 
 ## FOR DEVELOPER
-### Get requirements
+### Get requirements (on Windows)
 ```
 cd c:\MyGit\MyPythonTools
 c:\Users\MinistrBob\.virtualenvs\MyPythonTools\Scripts\activate
-pip freeze > c:\MyGit\MyPythonTools\requirements.txt
+pip freeze | Out-File -Encoding UTF8 requirements.txt
 ```
