@@ -3,6 +3,7 @@ https://github.com/boto/boto
 
 https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
 http://docs.pythonboto.org/en/latest/boto_config_tut.html
+https://cloud.yandex.ru/docs/storage/tools/boto
 
 
 ## FOR DEVELOPER
