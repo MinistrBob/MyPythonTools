@@ -18,7 +18,11 @@ docker run -it --rm ministrbob/my-python-tools-gitlab:latest
 ```
 
 ### Links
-https://python-gitlab.readthedocs.io/en/stable/
+[python-gitlab v3.1.1](https://python-gitlab.readthedocs.io/en/stable/)
+
+
 
 ### Useful
-python-gitlab only supports GitLab API v4.  
+- python-gitlab only supports GitLab API v4.  
+- If you use `http_username\http_password` than I get error: `gitlab.exceptions.GitlabHttpError: 404: 404 Project Not Found`. With token no problem.
+- On free version Gitlab only available personal token (not project and group). The token must have all the necessary rights.  

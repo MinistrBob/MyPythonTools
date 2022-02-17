@@ -3,13 +3,7 @@ import gitlab
 import common.custom_logger as custom_logger
 import os
 import gitlab_app_conf as conf
-import MyGitLab
-
-"""
-<class 'gitlab.v4.objects.ProjectRegistryRepository'> => {'id': 1014301, 'name': 'bff', 'path': 'i-teco/rostourism-registry-backend/bff', 'project_id': 16881551, 'location': 'registry.gitlab.com/i-teco/rostourism-registry-backend/bff', 'created_at': '2020-04-03T12:52:32.289Z', 'cleanup_policy_started_at': None}
-<class 'gitlab.v4.objects.ProjectRegistryTag'> => {'name': 'latest', 'path': 'i-teco/rostourism-registry-backend/bff:latest', 'location': 'registry.gitlab.com/i-teco/rostourism-registry-backend/bff:latest'}
-<class 'gitlab.v4.objects.ProjectRegistryTag'> => {'name': 'latest', 'path': 'i-teco/rostourism-registry-backend/bff:latest', 'location': 'registry.gitlab.com/i-teco/rostourism-registry-backend/bff:latest', 'revision': '210a384c17317d973ebe357524d8a1f864823152ec361e12d4f70e83e3a034d6', 'short_revision': '210a384c1', 'digest': 'sha256:994bd8969892e4094c9373d2af595b2993a706b57e22b431f74f9806d299140a', 'created_at': '2021-02-18T14:22:12.958+00:00', 'total_size': 156780434}
-"""
+from GitLab import MyGitLab
 
 if __name__ == '__main__':
     program_file = os.path.realpath(__file__)
