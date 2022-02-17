@@ -21,13 +21,17 @@ if __name__ == '__main__':
 
     # Get project
     project = gl.projects.get(id=settings.project_id)
-    print(project)
+    # print(project)
 
     repositories = project.repositories.list(all=True)
     for repository in repositories:
         # print(repository)
         if repository.id in settings.repo_id:
             print(repository)
-            tags = repository.tags.list(all=True)
-            for tag in tags:
-                print(tag)
+            # ttt = repository.tags.get(id='sha-0cefe9fe')
+            # print()
+            # tags = repository.tags.list(all=True)
+            # for tag in tags:
+            #     print(tag)
+
+
