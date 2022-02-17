@@ -19,7 +19,7 @@ docker run -it --rm ministrbob/my-python-tools-gitlab:latest
 
 ### Links
 [python-gitlab v3.1.1](https://python-gitlab.readthedocs.io/en/stable/)
-
+[requests](https://docs.python-requests.org/en/latest/user/quickstart/)
 
 
 ### Useful
