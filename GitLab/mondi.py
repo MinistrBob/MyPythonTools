@@ -6,6 +6,7 @@ If a new version is found, an action is taken, such as deploying the application
 import os
 import requests
 import gitlab
+import datetime
 
 import SETTINGS_mondi
 import custom_logger
@@ -20,6 +21,42 @@ def get_latest_tag(tags_dict):
     for name, digest in tags_dict.items():
         if name != 'latest' and digest == latest_digest:
             return name
+
+
+def execute_cmd(cmd, log, cwd_=None, message=None, message_prefix=None, output_prefix=None):
+    """
+    Execute cmd command (execute_cmd(cmd, cwd_="backend/deployment"))
+    :param log: Logger.
+    :param cmd: Executed command (r"rsync -vrt --exclude 'backup.cmd' --exclude 'config.yaml' /home/ci/script/backend/ci/ /home/ci/script/")
+    :param cwd_: Working dir (cwd_="backend/deployment")
+    :param message: Add message, before executed command.
+    :param message_prefix: Prefix before every log message (f"... ")
+    :param output_prefix: Add message, after executed command.
+    :return: Output executed command
+    """
+    out = ""
+    if not message_prefix:
+        message_prefix = ""
+    if not output_prefix:
+        output_prefix = ""
+    if message:
+        log.info(f"{message_prefix}{message}")
+    else:
+        log.info(f"{message_prefix}{cmd}")
+
+    try:
+        # output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True, )
+        completed_process = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True, cwd=cwd_)
+    except subprocess.CalledProcessError as exc:
+        out = f"ERROR:\n{exc.returncode}\n{exc.output}"
+        log.error(out)
+        exit(777)
+    else:
+        # out = output.decode("utf-8")
+        out = completed_process.stdout
+        log.info(f'{output_prefix}{completed_process.stdout}')
+
+    return out
 
 
 if __name__ == '__main__':
@@ -78,7 +115,10 @@ if __name__ == '__main__':
         tag = image_list[1]
         log.debug(f"image_name={image_name}; tag={tag}")
         if latest_tags[image_name] != tag:
+            # Execute CI
+            cmd = f"/home/ci/script/ci.sh deploy {image_name}={tag}"
             log.info(f"Start ci process for {deployment_name}")
+            execute_cmd(cmd, log)
 
     log.info(f"Program completed")
     log.info(f"Total time spent: {datetime.datetime.now() - begin_time} sec.")
