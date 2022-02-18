@@ -3,15 +3,16 @@ Monitoring for docker image (mondi). Script watches for new version docker image
 The script periodically monitors the appearance of a new version of the docker image.
 If a new version is found, an action is taken, such as deploying the application.
 """
-import os
-import requests
-import gitlab
 import datetime
+import os
+import subprocess
+
+import gitlab
+import requests
+from kubernetes import client, config
 
 import SETTINGS_mondi
 import custom_logger
-from mygitlab import MyGitLab
-from kubernetes import client, config
 
 
 # Because an image with two tags "latest" and "sha-ecd87758" is published to the repository at once,
