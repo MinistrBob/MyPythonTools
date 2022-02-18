@@ -104,6 +104,7 @@ if __name__ == '__main__':
     # Compare latest_tags dict with info from kubernetes and run ci application if needed
     config.load_kube_config(config_file=settings.kube_config_file)
     v1 = client.AppsV1Api()
+    deploy_list = ""
     for deployment_name in settings.kube_deployments_name:
         ret = v1.read_namespaced_deployment(deployment_name, settings.kube_namespace)
         log.debug(f"ret={ret}")
@@ -115,10 +116,12 @@ if __name__ == '__main__':
         tag = image_list[1]
         log.debug(f"image_name={image_name}; tag={tag}")
         if latest_tags[image_name] != tag:
-            # Execute CI
-            cmd = f"/home/ci/script/ci.sh deploy {image_name}={tag}"
-            log.info(f"Start ci process for {deployment_name}")
-            execute_cmd(cmd, log)
+            deploy_list = f"{deploy_list} {image_name}={tag}"
+
+    # Execute CI
+    cmd = f"/home/ci/script/ci.sh deploy {deploy_list}"
+    log.info(f"Start CI process for {deploy_list}")
+    execute_cmd(cmd, log)
 
     log.info(f"Program completed")
     log.info(f"Total time spent: {datetime.datetime.now() - begin_time} sec.")
