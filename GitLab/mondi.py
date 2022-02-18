@@ -23,6 +23,7 @@ def get_latest_tag(tags_dict):
 
 
 if __name__ == '__main__':
+    begin_time = datetime.datetime.now()
     # Get settings
     settings = SETTINGS_mondi.get_settings()
 
@@ -78,3 +79,6 @@ if __name__ == '__main__':
         log.debug(f"image_name={image_name}; tag={tag}")
         if latest_tags[image_name] != tag:
             log.info(f"Start ci process for {deployment_name}")
+
+    log.info(f"Program completed")
+    log.info(f"Total time spent: {datetime.datetime.now() - begin_time} sec.")
