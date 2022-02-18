@@ -59,23 +59,19 @@ def execute_cmd(cmd, log, cwd_=None, message=None, message_prefix=None, output_p
     return out
 
 
-if __name__ == '__main__':
-    begin_time = datetime.datetime.now()
-    # Get settings
-    settings = SETTINGS_mondi.get_settings()
+def send_telegram_msg(text):
+    url_req = f"https://api.telegram.org/bot{settings.token}/sendMessage?chat_id={settings.chat_id}&disable_web_page_preview=1&text={text}"
+    results = requests.get(url_req)
+    # print(results.json())
+    return results.json()
 
-    # Get logging
-    program_file = os.path.realpath(__file__)
-    log = custom_logger.get_logger(settings)
-    log.info("\n" * 3)
 
+def main(settings, log):
     # personal token authentication (GitLab.com)
     gl = gitlab.Gitlab(private_token=settings.private_token, retry_transient_errors=True, timeout=60)
-
     # Get project
     project = gl.projects.get(id=settings.project_id)
     log.debug(f'project={project}')
-
     # Get latest_tags dict
     repositories = project.repositories.list(all=True)
     latest_tags = {}
@@ -100,7 +96,6 @@ if __name__ == '__main__':
             log.debug(f"latest_tag={latest_tag}")
             latest_tags[repository.name] = latest_tag
     log.info(f"Latest tags: {latest_tags}")  # {'image1': 'sha-7d1d28c7', 'image2': 'sha-ecd87758'}
-
     # Compare latest_tags dict with info from kubernetes and run ci application if needed
     config.load_kube_config(config_file=settings.kube_config_file)
     v1 = client.AppsV1Api()
@@ -117,11 +112,29 @@ if __name__ == '__main__':
         log.debug(f"image_name={image_name}; tag={tag}")
         if latest_tags[image_name] != tag:
             deploy_list = f"{deploy_list} {image_name}={tag}"
-
     # Execute CI
-    cmd = f"/home/ci/script/ci.sh deploy {deploy_list}"
-    log.info(f"Start CI process for {deploy_list}")
-    execute_cmd(cmd, log)
+    if deploy_list:
+        cmd = f"/home/ci/script/ci.sh deploy{deploy_list}"  # space doesn't need it is in deploy_list
+        log.info(f"Start CI process for {deploy_list}")
+        execute_cmd(cmd, log)
+        send_telegram_msg(f"✅ ``` mondi.py ```%0A%0Aupdated {deploy_list}")
+
+
+if __name__ == '__main__':
+    begin_time = datetime.datetime.now()
+    # Get settings
+    settings = SETTINGS_mondi.get_settings()
+
+    # Get logging
+    program_file = os.path.realpath(__file__)
+    log = custom_logger.get_logger(settings)
+    log.info("\n" * 3)
+
+    # in case of any error notification in telegram
+    try:
+        main(settings, log)
+    except Exception as err:
+        send_telegram_msg(f"❌ ``` mondi.py ```%0A%0AERROR:\n{err}")
 
     log.info(f"Program completed")
     log.info(f"Total time spent: {datetime.datetime.now() - begin_time} sec.")

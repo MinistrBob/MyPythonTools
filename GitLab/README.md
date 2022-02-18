@@ -23,6 +23,7 @@ docker run -it --rm ministrbob/my-python-tools-gitlab:latest
 [A Beginner’s Guide to Kubernetes Python Client](https://www.velotio.com/engineering-blog/kubernetes-python-client)
 [Kubernetes Python Client](https://github.com/kubernetes-client/python)
 [Kubernetes Python Client.README.md](https://github.com/kubernetes-client/python/blob/master/kubernetes/README.md)
+[Telegram Bot API](https://core.telegram.org/bots/api)
 
 ### Useful
 - python-gitlab only supports GitLab API v4.  
