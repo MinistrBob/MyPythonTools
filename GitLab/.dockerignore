@@ -5,3 +5,6 @@
 README.md
 Dockerfile
 SETTINGS_mondi.py
+README_secret.md
+kube_config
+id_rsa

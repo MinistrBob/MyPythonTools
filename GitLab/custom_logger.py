@@ -16,8 +16,10 @@ def get_logger(settings):
     # Определение уровня логирования
     if settings.DEBUG:
         log_level = logging.DEBUG
+        # print("logging.DEBUG")
     else:
         log_level = logging.INFO
+        # print("logging.INFO")
 
     # Формирование custom_logger. Логируем всё в stdout, а если нужно, то еще и в файл.
     # log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
