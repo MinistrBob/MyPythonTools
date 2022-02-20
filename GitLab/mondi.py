@@ -71,7 +71,6 @@ def send_telegram_msg(text):
 def main(settings, log):
     log.info(" ")
     log.info(f"Get latest tags from Gitlab container registry")
-    log.info(" ")
     # personal token authentication (GitLab.com)
     gl = gitlab.Gitlab(private_token=settings.gitlab_private_token, retry_transient_errors=True, timeout=60)
     # Get project
@@ -105,7 +104,6 @@ def main(settings, log):
     # Compare latest_tags dict with info from kubernetes
     log.info(" ")
     log.info(f"Compare latest_tags dict with info from kubernetes")
-    log.info(" ")
     config.load_kube_config(config_file=settings.kube_config_file)
     v1 = client.AppsV1Api()
     deploy_images_str = ""
@@ -126,7 +124,6 @@ def main(settings, log):
     # Execute CI application if needed
     log.info(" ")
     log.info(f"Execute CI application if needed")
-    log.info(" ")
     if deploy_images_str:
         # cmd = f"eval $(ssh-agent -s)"
         # execute_cmd(cmd, log)
@@ -168,6 +165,7 @@ if __name__ == '__main__':
         send_telegram_msg(f"❌ ``` mondi.py ```%0A%0AERROR:\n{err}")
         exit(1)
 
+    log.info(" ")
     log.info(f"Program completed")
     log.info(f"Total time spent: {datetime.datetime.now() - begin_time} sec.")
     log.info("****  THE END.  ****".center(80, " "))
