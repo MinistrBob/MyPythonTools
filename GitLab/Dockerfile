@@ -7,7 +7,8 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-# COPY mondi.py .
+COPY custom_logger.py .
+COPY mondi.py .
 
 ENTRYPOINT [ "python3"]
 CMD ["/app/mondi.py"]

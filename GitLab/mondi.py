@@ -7,12 +7,12 @@ import datetime
 import os
 import subprocess
 import traceback
+import sys
 
 import gitlab
 import requests
 from kubernetes import client, config
 
-import SETTINGS_mondi
 import custom_logger
 
 
@@ -143,6 +143,8 @@ def main(settings, log):
 if __name__ == '__main__':
     begin_time = datetime.datetime.now()
     # Get settings
+    sys.path.append(r"/mondi")
+    import SETTINGS_mondi
     settings = SETTINGS_mondi.get_settings()
 
     # Get logging
