@@ -1,3 +1,24 @@
+# mondi.py
+Monitoring for docker image (mondi). Script watches for new version docker image in Gitlab Container Registry.  
+The script periodically monitors the appearance of a new version of the docker image.  
+If a new version is found, an action is taken, such as deploying the application.  
+
+Приложение внутри контейнера с python:3.10 в папке /app. Контейнер запускается с помощью /home/<user>/mondi/mondi_start.sh каждые 30 мин. через cron. 
+crontab:
+```commandline
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ci/.local/bin:/home/ci/bin
+MAILTO=""
+
+*/30 * * * * /home/ci/mondi/mondi_start.sh >> /home/ci/mondi/mondi.log 2>&1
+50 23 * * * echo cleared > /home/ci/mondi/mondi.log 2>&1
+```
+В контейнер монтируются папки (для приватных данных):
+/home/<user>/mondi:/mondi - SETTINGS_mondi.py
+/home/<user>/.ssh:/ssh - отсюда берётся ключ для работы с SSH
+/home/<user>/.kube:/kube - отсюда берётся config для работы с kubernetes
+
+
 ## FOR DEVELOPER
 ### Get requirements (on Windows)
 ```
@@ -14,7 +35,7 @@ docker login --username XXX --password XXX
 docker push ministrbob/my-python-tools-gitlab:latest
 
 docker pull ministrbob/my-python-tools-gitlab:latest
-docker run -it --rm ministrbob/my-python-tools-gitlab:latest
+docker run -it --rm ministrbob/my-python-tools-gitlab:latest bash
 ```
 
 ### Links
@@ -27,5 +48,5 @@ docker run -it --rm ministrbob/my-python-tools-gitlab:latest
 
 ### Useful
 - python-gitlab only supports GitLab API v4.  
-- If you use `http_username\http_password` than I get error: `gitlab.exceptions.GitlabHttpError: 404: 404 Project Not Found`. With token no problem.
+- If you use `http_username\http_password` in python-gitlab than I get error: `gitlab.exceptions.GitlabHttpError: 404: 404 Project Not Found`. With token no problem.
 - On free version Gitlab only available personal token (not project and group). The token must have all the necessary rights.  
