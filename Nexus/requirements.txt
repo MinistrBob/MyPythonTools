@@ -1,0 +1,7 @@
+certifi==2022.6.15
+pip==22.2.2
+python-dateutil==2.8.2
+setuptools==65.3.0
+six==1.16.0
+swagger-client==1.0.0
+urllib3==1.26.12
