@@ -32,6 +32,16 @@ def main():
     bat = configuration.get_basic_auth_token()
     # print(bat)
     api_client = swagger_client.ApiClient(configuration=configuration, header_name='Authorization', header_value=bat)
+    # get_components(api_client)
+    upload_file(api_client)
+
+
+def upload_file(api_client):
+    api_instance = swagger_client.ComponentsApi(api_client)
+    api_instance.upload_component(repository=settings.NX_REPO, raw_directory='/', raw_asset1=r'c:\!SAVE\tags.yaml', raw_asset1_filename='tags.yaml')
+
+
+def get_components(api_client):
     api_instance = swagger_client.ComponentsApi(api_client)
     repository = settings.NX_REPO  # str
     result = []
@@ -53,7 +63,6 @@ def main():
             break
         else:
             continuation_token = page.continuation_token
-
     pprint(result)
 
 
