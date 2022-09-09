@@ -139,3 +139,4 @@ S3/secret.py
 GitLab/README_secret.md
 GitLab/kube_config
 GitLab/id_rsa
+Nexus/tags.yaml

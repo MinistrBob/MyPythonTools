@@ -1,14 +1,9 @@
 from __future__ import print_function
-import os
-import time
+
 import logging
 import sys
-import json
-import requests
-import swagger_client
+
 import SETTINGS
-from swagger_client.rest import ApiException
-from pprint import pprint
 from nexus_helper.nexus_helper import NexusHelper
 
 # Program settings

@@ -1,9 +1,10 @@
 import os
+from typing import List, NoReturn
+
 import requests
 import swagger_client
-from swagger_client.rest import ApiException
 from swagger_client import PageComponentXO
-from typing import List, NoReturn
+from swagger_client.rest import ApiException
 
 
 class NexusHelper(object):
