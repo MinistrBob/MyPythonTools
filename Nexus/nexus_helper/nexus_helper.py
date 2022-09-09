@@ -5,6 +5,7 @@ import requests
 import swagger_client
 from swagger_client import PageComponentXO
 from swagger_client.rest import ApiException
+from .Class_NexusComponent import NexusComponent
 
 
 class NexusHelper(object):
@@ -16,8 +17,8 @@ class NexusHelper(object):
         self.configuration.password = settings.nexus_password
         self.configuration.debug = settings.DEBUG
         self.nexus_repo = settings.nexus_repo
-        self.tags_yaml_file = settings.tags_yaml_file  # tags.yaml в nexus
-        self.tags_yaml = os.path.join(settings.work_dir, r"tags.yaml")  # локальный tags.yaml
+        self.tags_yaml_file = None  # tags.yaml в nexus
+        self.tags_yaml = None  # локальный tags.yaml
         self.bat = self.configuration.get_basic_auth_token()
         self.api_client = swagger_client.ApiClient(configuration=self.configuration, header_name='Authorization',
                                                    header_value=self.bat)
@@ -40,9 +41,9 @@ class NexusHelper(object):
             code.write(r.content)
 
     def upload_tags(self,
-                          local_file=None,
-                          nexus_raw_directory=r'/',
-                          nexus_raw_filename=r'tags.yaml') -> NoReturn:
+                    local_file=None,
+                    nexus_raw_directory=r'/',
+                    nexus_raw_filename=r'tags.yaml') -> NoReturn:
         """
         Закачать файл tags.yaml в Nexus. По умолчанию, закачивается локальный tags.yaml в корень репозитория '/'.
 
@@ -57,19 +58,20 @@ class NexusHelper(object):
         api_instance.upload_component(repository=self.nexus_repo, raw_directory=nexus_raw_directory,
                                       raw_asset1=local_file, raw_asset1_filename=nexus_raw_filename)
 
-    def get_components(self) -> List[PageComponentXO]:
+    def get_list_component_pages(self) -> List[PageComponentXO]:
         """
         List of PageComponentXO
         :return:
         """
         api_instance = swagger_client.ComponentsApi(self.api_client)
         result = []
-        i = 0
+        i = 1
         page = None
         continuation_token = ''
         while 1 == 1:
+            self.log.debug(f"Страница {i}")
             try:
-                if i == 0:
+                if i == 1:
                     page = api_instance.get_components(repository=self.nexus_repo)
                 else:
                     page = api_instance.get_components(repository=self.nexus_repo,
@@ -79,7 +81,43 @@ class NexusHelper(object):
                 self.log.error("Exception when calling ComponentsApi->get_components: %s\n" % e)
             result.append(page)
             i += 1
-            self.log.debug(f"Страница {i}")
+            if page.continuation_token is None:
+                break
+            else:
+                continuation_token = page.continuation_token
+        self.log.debug(result)
+        return result
+
+    def get_list_component_items(self):
+        """
+        Dict of items
+        :return:
+        """
+        api_instance = swagger_client.ComponentsApi(self.api_client)
+        result = {}
+        page_count = 1
+        page = None
+        continuation_token = ''
+        while 1 == 1:
+            self.log.debug(f"Страница {page_count}")
+            try:
+                if page_count == 1:
+                    page = api_instance.get_components(repository=self.nexus_repo)
+                else:
+                    page = api_instance.get_components(repository=self.nexus_repo,
+                                                       continuation_token=continuation_token)
+                self.log.debug(page)
+            except ApiException as e:
+                self.log.error("Exception when calling ComponentsApi->get_components: %s\n" % e)
+            for item in page.items:
+                if item.name not in result.keys():
+                    result[item.name] = []
+                nc = NexusComponent(item.id, item.name, item.version, item.assets[0].download_url, item.assets[0].last_modified)
+                # result.append(nc)
+                result[item.name].append(nc)
+
+            break
+            page_count += 1
             if page.continuation_token is None:
                 break
             else:
