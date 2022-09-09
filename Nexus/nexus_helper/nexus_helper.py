@@ -1,7 +1,8 @@
+import os
 import requests
 import swagger_client
-import nexus_helper
 from swagger_client.rest import ApiException
+from swagger_client import PageComponentXO
 from typing import List, NoReturn
 
 
@@ -14,29 +15,31 @@ class NexusHelper(object):
         self.configuration.password = settings.nexus_password
         self.configuration.debug = settings.DEBUG
         self.nexus_repo = settings.nexus_repo
-        self.work_dir = settings.work_dir
-        self.tags_yaml = os.path.join(self.work_dir, r"tags.yaml")
+        self.tags_yaml_file = settings.tags_yaml_file  # tags.yaml в nexus
+        self.tags_yaml = os.path.join(settings.work_dir, r"tags.yaml")  # локальный tags.yaml
         self.bat = self.configuration.get_basic_auth_token()
-        self.api_client = swagger_client.ApiClient(configuration=configuration, header_name='Authorization',
-                                                   header_value=bat)
+        self.api_client = swagger_client.ApiClient(configuration=self.configuration, header_name='Authorization',
+                                                   header_value=self.bat)
 
     def __str__(self):
         return f"host={self.configuration.host}|username={self.configuration.username}|bat={self.bat}"
 
-    def nexus_download_tags(self, download_url: str) -> NoReturn:
+    def download_tags(self, download_url=None) -> NoReturn:
         """
         Скачать файл tags.yaml из Nexus.
 
         Args:
             download_url: URL для скачивания.
         """
+        if download_url is None:
+            download_url = self.tags_yaml_file
         r = requests.get(download_url, auth=(self.configuration.username, self.configuration.password))
         self.log.debug(f"{r.status_code}")
         with open(self.tags_yaml, "wb") as code:
             code.write(r.content)
 
-    def nexus_upload_tags(self,
-                          local_file=self.tags_yaml,
+    def upload_tags(self,
+                          local_file=None,
                           nexus_raw_directory=r'/',
                           nexus_raw_filename=r'tags.yaml') -> NoReturn:
         """
@@ -47,11 +50,17 @@ class NexusHelper(object):
             nexus_raw_filename: Имя файла в Nexus репо.
             nexus_raw_directory: Имя папки в Nexus репо.
         """
+        if local_file is None:
+            local_file = self.tags_yaml
         api_instance = swagger_client.ComponentsApi(self.api_client)
         api_instance.upload_component(repository=self.nexus_repo, raw_directory=nexus_raw_directory,
                                       raw_asset1=local_file, raw_asset1_filename=nexus_raw_filename)
 
-    def nexus_get_components(self) -> List[PageComponentXO]:
+    def get_components(self) -> List[PageComponentXO]:
+        """
+        List of PageComponentXO
+        :return:
+        """
         api_instance = swagger_client.ComponentsApi(self.api_client)
         result = []
         i = 0
