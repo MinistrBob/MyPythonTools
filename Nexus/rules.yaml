@@ -1,0 +1,8 @@
+# Я бы оставлял последний месяц, но не менее 10 штук
+repos:
+  minust-pp-docker:
+      - name: image1
+        count: 3
+        days: 30
+      - name: image3
+        count: 1

@@ -88,7 +88,7 @@ class NexusHelper(object):
         self.log.debug(result)
         return result
 
-    def get_list_component_items(self):
+    def get_list_component_items(self) -> List[NexusComponent]:
         """
         Dict of items
         :return:
@@ -116,7 +116,7 @@ class NexusHelper(object):
                 # result.append(nc)
                 result[item.name].append(nc)
 
-            break
+            # break
             page_count += 1
             if page.continuation_token is None:
                 break

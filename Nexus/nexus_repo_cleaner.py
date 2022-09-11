@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import traceback
+import yaml
 
 from nexus_helper.nexus_helper import NexusHelper
 
@@ -22,11 +23,30 @@ def main():
     # Create app logger
     set_logger()
     logger.debug(settings)
-    # work
-    nexus = NexusHelper(settings, logger)
-    result = nexus.get_list_component_items()
-    print(f"Всего {len(result)} items")
-    print(result)
+    # Читаем списки правил для каждого репо из rules.yaml
+    with open("rules.yaml", "r") as stream:
+        try:
+            rules_yaml = yaml.safe_load(stream)
+        except yaml.YAMLError as err:
+            logger.error(f"ERROR: {err}\n{traceback.format_exc()}")
+    logger.debug(rules_yaml)
+    repos = rules_yaml['repos']
+    # Обрабатываем каждый репозиторий
+    for repo in repos:
+        rules = repos[repo]
+        settings.nexus_repo = repo
+        nexus = NexusHelper(settings, logger)
+        result = nexus.get_list_component_items()
+        print(f"Всего {len(result)} items")
+        print(result)
+        # Можно сразу из списка result удалить все образы exclude.
+        #
+        # У меня есть список образов. Далее нужно идти по списку правил циклом.
+        # Каждое правило применять к result, если образ соответствует правилу =
+        # чистить его теги в соответствии с правилами. И удалять этот образ из result =
+        # обработанные образы чистятся первым подходящим правилом и удаляются, result становится меньше.
+        #
+
 
 
 class Settings(object):
