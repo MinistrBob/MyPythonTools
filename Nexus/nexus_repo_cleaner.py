@@ -37,9 +37,12 @@ def main():
         logger.info(f"Work with {repo} repo")
         settings.nexus_repo = repo
         nexus = NexusHelper(settings, logger)
-        result = nexus.get_list_component_items()
-        logger.debug(f"Всего {len(result)} items")
+        if settings.DEBUG:
+            result = nexus.fake_get_list_component_items()
+        else:
+            result = nexus.get_list_component_items()
         logger.debug(result)
+        logger.debug(f"Всего {len(result)} items")
         # Из списка result удалить все образы которые соответствуют правилам exclude_rules.
         logger.info(f"Apply exclude_rules")
         exclude_rules = repos[repo]['exclude_rules']
@@ -58,13 +61,21 @@ def main():
         include_rules = repos[repo]['include_rules']
         logger.debug(include_rules)
         for rule in include_rules:
-            rule = rule['rule']
-            logger.debug(f"{type(rule)} | {rule}")
+            rule_rule = rule['rule']
+            logger.debug(f"{type(rule_rule)} | {rule_rule}")
             for name in list(result.keys()):
-                if re.search(rule, name):
-                    logger.debug(f"{rule} | {name}")
+                if re.search(rule_rule, name):
+                    logger.debug(f"{rule_rule} | {name}")
                     # TODO оставить Save last XXX images.
+                    # Сортируем list of components (NexusComponent) по reverse last_modified и берём всё что далее last.
+                    result[name].sort(reverse=True, key=lambda comp: comp.last_modified)
+                    for i in result[name]:
+                        print(f"{i.name} | {i.last_modified}")
                     # TODO остальные проверить на > days и удалить.
+                    list_for_check_days = result[name][rule['last']:]
+                    print("Check date")
+                    for comp in list_for_check_days:
+                        print(f"{comp.name} | {comp.last_modified}")
 
 
 class Settings(object):

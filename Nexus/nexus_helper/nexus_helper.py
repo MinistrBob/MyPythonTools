@@ -1,10 +1,13 @@
-import os
+import datetime
 from typing import List, NoReturn
+from dateutil.tz import tzutc
 
 import requests
 import swagger_client
+from dateutil.tz import tzutc
 from swagger_client import PageComponentXO
 from swagger_client.rest import ApiException
+
 from .Class_NexusComponent import NexusComponent
 
 
@@ -112,7 +115,8 @@ class NexusHelper(object):
             for item in page.items:
                 if item.name not in result.keys():
                     result[item.name] = []
-                nc = NexusComponent(item.id, item.name, item.version, item.assets[0].download_url, item.assets[0].last_modified)
+                nc = NexusComponent(item.id, item.name, item.version, item.assets[0].download_url,
+                                    item.assets[0].last_modified)
                 # result.append(nc)
                 result[item.name].append(nc)
 
@@ -123,6 +127,40 @@ class NexusHelper(object):
             else:
                 continuation_token = page.continuation_token
         self.log.debug(result)
+        return result
+
+    def fake_get_list_component_items(self):
+        result = {"platform-public-front/platform-public-front": []}
+        comp1 = NexusComponent("bWludXN0LXBwLWRvY2tlcjozZjVjYWUwMTc2MDIzM2I2NjUwMWRhYWVmOGY3MDk4Ng111",
+                               "platform-public-front/platform-public-front",
+                               "latest",
+                               "http://172.22.22.22:8081/repository/pp-docker/v2/platform-public-front/platform-public-front/manifests/latest",
+                               datetime.datetime(2022, 9, 9, 21, 8, 55, 867000, tzinfo=tzutc()))
+        comp2 = NexusComponent("bWludXN0LXBwLWRvY2tlcjozZjVjYWUwMTc2MDIzM2I2NjUwMWRhYWVmOGY3MDk4Ng222",
+                               "platform-public-front/platform-public-front",
+                               "sha-222222",
+                               "http://172.22.22.22:8081/repository/pp-docker/v2/platform-public-front/platform-public-front/manifests/sha-222222",
+                               datetime.datetime(2022, 9, 10, 22, 8, 55, 867000, tzinfo=tzutc()))
+        comp3 = NexusComponent("bWludXN0LXBwLWRvY2tlcjozZjVjYWUwMTc2MDIzM2I2NjUwMWRhYWVmOGY3MDk4Ng333",
+                               "platform-public-front/platform-public-front",
+                               "sha-333333",
+                               "http://172.22.22.22:8081/repository/pp-docker/v2/platform-public-front/platform-public-front/manifests/sha-333333",
+                               datetime.datetime(2022, 9, 11, 23, 8, 55, 867000, tzinfo=tzutc()))
+        comp4 = NexusComponent("bWludXN0LXBwLWRvY2tlcjozZjVjYWUwMTc2MDIzM2I2NjUwMWRhYWVmOGY3MDk4Ng444",
+                               "platform-public-front/platform-public-front",
+                               "sha-444444",
+                               "http://172.22.22.22:8081/repository/pp-docker/v2/platform-public-front/platform-public-front/manifests/sha-444444",
+                               datetime.datetime(2021, 5, 5, 6, 18, 55, 867000, tzinfo=tzutc()))
+        comp5 = NexusComponent("bWludXN0LXBwLWRvY2tlcjozZjVjYWUwMTc2MDIzM2I2NjUwMWRhYWVmOGY3MDk4Ng555",
+                               "platform-public-front/platform-public-front",
+                               "sha-555555",
+                               "http://172.22.22.22:8081/repository/pp-docker/v2/platform-public-front/platform-public-front/manifests/sha-555555",
+                               datetime.datetime(2022, 3, 7, 8, 8, 55, 867000, tzinfo=tzutc()))
+        result["platform-public-front/platform-public-front"].append(comp1)
+        result["platform-public-front/platform-public-front"].append(comp2)
+        result["platform-public-front/platform-public-front"].append(comp3)
+        result["platform-public-front/platform-public-front"].append(comp4)
+        result["platform-public-front/platform-public-front"].append(comp5)
         return result
 
 
