@@ -1,11 +1,12 @@
 import logging
 import os
+import re
 import sys
 import traceback
+
 import yaml
 
 from nexus_helper.nexus_helper import NexusHelper
-
 
 # Program settings
 settings = {}
@@ -33,20 +34,37 @@ def main():
     repos = rules_yaml['repos']
     # Обрабатываем каждый репозиторий
     for repo in repos:
-        rules = repos[repo]
+        logger.info(f"Work with {repo} repo")
         settings.nexus_repo = repo
         nexus = NexusHelper(settings, logger)
         result = nexus.get_list_component_items()
-        print(f"Всего {len(result)} items")
-        print(result)
-        # Можно сразу из списка result удалить все образы exclude.
-        #
-        # У меня есть список образов. Далее нужно идти по списку правил циклом.
-        # Каждое правило применять к result, если образ соответствует правилу =
-        # чистить его теги в соответствии с правилами. И удалять этот образ из result =
-        # обработанные образы чистятся первым подходящим правилом и удаляются, result становится меньше.
-        #
-
+        logger.debug(f"Всего {len(result)} items")
+        logger.debug(result)
+        # Из списка result удалить все образы которые соответствуют правилам exclude_rules.
+        logger.info(f"Apply exclude_rules")
+        exclude_rules = repos[repo]['exclude_rules']
+        logger.debug(exclude_rules)
+        for rule in exclude_rules:
+            rule = rule['rule']
+            logger.debug(f"{type(rule)} | {rule}")
+            for name in list(result.keys()):
+                if re.search(rule, name):
+                    logger.debug(f"{rule} | {name}")
+                    del result[name]
+        logger.debug(f"После exclude_rules всего {len(result)} items")
+        logger.debug(result)
+        # Оставшиеся образы обрабатываем правилами include_rules.
+        logger.info(f"Apply include_rules")
+        include_rules = repos[repo]['include_rules']
+        logger.debug(include_rules)
+        for rule in include_rules:
+            rule = rule['rule']
+            logger.debug(f"{type(rule)} | {rule}")
+            for name in list(result.keys()):
+                if re.search(rule, name):
+                    logger.debug(f"{rule} | {name}")
+                    # TODO оставить Save last XXX images.
+                    # TODO остальные проверить на > days и удалить.
 
 
 class Settings(object):

@@ -1,8 +1,33 @@
-# Я бы оставлял последний месяц, но не менее 10 штук
+# repos: List of docker repos
+#   <repo_name>:
+#     exclude_rules: Docker images whose names match these rules are excluded from processing.
+#       - rule: Regular expression for search name.
+#     include_rules: Docker images whose names match these rules will be deleted.
+#       - rule: Regular expression for search name.
+#         last: Save last XXX images.
+#         days: Delete images older than XXX days.
+#
+# Example: Delete images older than 30 days but save last 10 images.
+#   last: 10
+#   days: 30
+#
 repos:
   minust-pp-docker:
-      - name: image1
-        count: 3
+    exclude_rules:
+      - rule: 'base/'
+      - rule: 'ext/'
+      - rule: 'platform-admin-front/frontend_base'
+      - rule: 'platform-back/backend_sdk_base'
+    include_rules:
+      - rule: 'platform-admin-constructor'
+        last: 10
         days: 30
-      - name: image3
-        count: 1
+      - rule: 'platform-admin-front'
+        last: 10
+        days: 30
+      - rule: 'platform-back'
+        last: 10
+        days: 30
+      - rule: 'platform-public-front'
+        last: 10
+        days: 30
