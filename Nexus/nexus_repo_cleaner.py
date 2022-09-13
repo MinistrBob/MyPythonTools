@@ -5,7 +5,7 @@ import sys
 import traceback
 
 import yaml
-
+from datetime import datetime, timedelta, timezone
 from nexus_helper.nexus_helper import NexusHelper
 
 # Program settings
@@ -21,9 +21,11 @@ def main():
     except Exception:
         print(f"ERROR: app cannot get settings\n{traceback.format_exc()}")
         exit(1)
+
     # Create app logger
     set_logger()
     logger.debug(settings)
+
     # Читаем списки правил для каждого репо из rules.yaml
     with open("rules.yaml", "r") as stream:
         try:
@@ -32,6 +34,7 @@ def main():
             logger.error(f"ERROR: {err}\n{traceback.format_exc()}")
     logger.debug(rules_yaml)
     repos = rules_yaml['repos']
+
     # Обрабатываем каждый репозиторий
     for repo in repos:
         logger.info(f"Work with {repo} repo")
@@ -43,6 +46,7 @@ def main():
             result = nexus.get_list_component_items()
         logger.debug(result)
         logger.debug(f"Всего {len(result)} items")
+
         # Из списка result удалить все образы которые соответствуют правилам exclude_rules.
         logger.info(f"Apply exclude_rules")
         exclude_rules = repos[repo]['exclude_rules']
@@ -56,6 +60,7 @@ def main():
                     del result[name]
         logger.debug(f"После exclude_rules всего {len(result)} items")
         logger.debug(result)
+
         # Оставшиеся образы обрабатываем правилами include_rules.
         logger.info(f"Apply include_rules")
         include_rules = repos[repo]['include_rules']
@@ -66,16 +71,20 @@ def main():
             for name in list(result.keys()):
                 if re.search(rule_rule, name):
                     logger.debug(f"{rule_rule} | {name}")
-                    # TODO оставить Save last XXX images.
+
+                    logger.info(f"Save last {rule['last']} images")
                     # Сортируем list of components (NexusComponent) по reverse last_modified и берём всё что далее last.
                     result[name].sort(reverse=True, key=lambda comp: comp.last_modified)
                     for i in result[name]:
-                        print(f"{i.name} | {i.last_modified}")
-                    # TODO остальные проверить на > days и удалить.
+                        logger.debug(f"{i.name} | {i.last_modified}")
                     list_for_check_days = result[name][rule['last']:]
-                    print("Check date")
+
+                    logger.info(f"Delete images older than {rule['days']} days")
                     for comp in list_for_check_days:
-                        print(f"{comp.name} | {comp.last_modified}")
+                        logger.debug(f"{comp.name} | {comp.last_modified}")
+                        if (datetime.now(timezone.utc) - comp.last_modified).days > rule['days']:
+                            logger.info(f"Delete component {comp.name} | {comp.last_modified}")
+                            # TODO Удаление образа
 
 
 class Settings(object):
