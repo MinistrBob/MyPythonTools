@@ -29,6 +29,10 @@ class NexusHelper(object):
     def __str__(self):
         return f"host={self.configuration.host}|username={self.configuration.username}|bat={self.bat}"
 
+    def delete_component(self, id_=None):
+        api_instance = swagger_client.ComponentsApi(self.api_client)
+        api_instance.delete_component(id=id_)
+
     def download_tags(self, download_url=None) -> NoReturn:
         """
         Скачать файл tags.yaml из Nexus.
