@@ -7,6 +7,7 @@ import traceback
 import yaml
 from datetime import datetime, timedelta, timezone
 from nexus_helper.nexus_helper import NexusHelper
+from zmpe import raise_error
 
 # Program settings
 settings = {}
@@ -31,7 +32,8 @@ def main():
         try:
             rules_yaml = yaml.safe_load(stream)
         except yaml.YAMLError as err:
-            logger.error(f"ERROR: {err}\n{traceback.format_exc()}")
+            raise_error(settings, logger, program=settings.PROGRAM, hostname=settings.HOSTNAME,
+                        message=f"{err}\n{traceback.format_exc()}", do_error_exit=True)
     logger.debug(rules_yaml)
     repos = rules_yaml['repos']
 
@@ -113,6 +115,9 @@ def get_settings():
     settings['nexus_password'] = os.getenv('NX_PASSWORD', "Unknown")
     settings['nexus_repo'] = os.getenv('NX_REPO', "Unknown")
     settings['DEV'] = os.getenv("NX_DEV", 'False').lower() in 'true'
+    settings['HOSTNAME'] = os.getenv('NX_HOSTNAME', "Unknown")
+    # Get program name (without extension so that telegram does not convert the program name into a link)
+    settings['PROGRAM'] = os.path.splitext(os.path.basename(__file__))[0]
     settings = Settings(settings)
 
 
