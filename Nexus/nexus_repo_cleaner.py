@@ -37,61 +37,64 @@ def main():
     logger.debug(rules_yaml)
     repos = rules_yaml['repos']
 
-    # Обрабатываем каждый репозиторий
-    for repo in repos:
-        logger.info(f"Work with {repo} repo")
-        settings.nexus_repo = repo
-        nexus = NexusHelper(settings, logger)
-        if settings.DEV:
-            result = nexus.fake_get_list_component_items()
-        else:
-            result = nexus.get_list_component_items()
-        logger.debug(result)
-        logger.debug(f"Всего {len(result)} items")
+    try:
+        # Обрабатываем каждый репозиторий
+        for repo in repos:
+            logger.info(f"Work with {repo} repo")
+            settings.nexus_repo = repo
+            nexus = NexusHelper(settings, logger)
+            if settings.DEV:
+                result = nexus.fake_get_list_component_items()
+            else:
+                result = nexus.get_list_component_items()
+            logger.debug(result)
+            logger.debug(f"Всего {len(result)} items")
 
-        # Из списка result удалить все образы которые соответствуют правилам exclude_rules.
-        logger.info(f" ")
-        logger.info(f"Apply exclude_rules")
-        exclude_rules = repos[repo]['exclude_rules']
-        logger.debug(exclude_rules)
-        for rule in exclude_rules:
-            rule = rule['rule']
-            logger.debug(f"{type(rule)} | {rule}")
-            for name in list(result.keys()):
-                if re.search(rule, name):
-                    logger.debug(f"{rule} | {name}")
-                    del result[name]
-        logger.info(f" ")
-        logger.debug(f"После exclude_rules осталось {len(result)} items")
-        logger.debug(result)
+            # Из списка result удалить все образы которые соответствуют правилам exclude_rules.
+            logger.info(f" ")
+            logger.info(f"Apply exclude_rules")
+            exclude_rules = repos[repo]['exclude_rules']
+            logger.debug(exclude_rules)
+            for rule in exclude_rules:
+                rule = rule['rule']
+                logger.debug(f"{type(rule)} | {rule}")
+                for name in list(result.keys()):
+                    if re.search(rule, name):
+                        logger.debug(f"{rule} | {name}")
+                        del result[name]
+            logger.info(f" ")
+            logger.debug(f"После exclude_rules осталось {len(result)} items")
+            logger.debug(result)
 
-        # Оставшиеся образы обрабатываем правилами include_rules.
-        logger.info(f" ")
-        logger.info(f"Apply include_rules")
-        include_rules = repos[repo]['include_rules']
-        logger.debug(include_rules)
-        for rule in include_rules:
-            rule_rule = rule['rule']
-            logger.debug(f" ")
-            logger.debug(f"    {type(rule_rule)} | {rule_rule}")
-            for name in list(result.keys()):
-                if re.search(rule_rule, name):
-                    logger.debug(f"    {rule_rule} | {name}")
+            # Оставшиеся образы обрабатываем правилами include_rules.
+            logger.info(f" ")
+            logger.info(f"Apply include_rules")
+            include_rules = repos[repo]['include_rules']
+            logger.debug(include_rules)
+            for rule in include_rules:
+                rule_rule = rule['rule']
+                logger.debug(f" ")
+                logger.debug(f"    {type(rule_rule)} | {rule_rule}")
+                for name in list(result.keys()):
+                    if re.search(rule_rule, name):
+                        logger.debug(f"    {rule_rule} | {name}")
 
-                    logger.info(f"Save last {rule['last']} images")
-                    # Сортируем list of components (NexusComponent) по reverse last_modified и берём всё что далее last.
-                    result[name].sort(reverse=True, key=lambda comp: comp.last_modified)
-                    for i in result[name][0:10]:
-                        logger.debug(f"    {i.name}:{i.version} | {i.last_modified}")
-                    list_for_check_days = result[name][rule['last']:]
+                        logger.info(f"Save last {rule['last']} images")
+                        # Сортируем list of components (NexusComponent) по reverse last_modified и берём всё что далее last.
+                        result[name].sort(reverse=True, key=lambda comp: comp.last_modified)
+                        for i in result[name][0:10]:
+                            logger.debug(f"    {i.name}:{i.version} | {i.last_modified}")
+                        list_for_check_days = result[name][rule['last']:]
 
-                    logger.info(f"Delete images older than {rule['days']} days")
-                    for comp in list_for_check_days:
-                        # logger.debug(f"    {comp.name}:{comp.version} | {comp.last_modified}")
-                        if (datetime.now(timezone.utc) - comp.last_modified).days > rule['days']:
-                            logger.info(f"Delete component {comp.name}:{comp.version} | {comp.last_modified}")
-                            # TODO Удаление образа
-                            # nexus.delete
+                        logger.info(f"Delete images older than {rule['days']} days")
+                        for comp in list_for_check_days:
+                            # logger.debug(f"    {comp.name}:{comp.version} | {comp.last_modified}")
+                            if (datetime.now(timezone.utc) - comp.last_modified).days > rule['days']:
+                                logger.info(f"Delete component {comp.name}:{comp.version} | {comp.last_modified}")
+                                nexus.delete(id=comp.id)
+    except Exception as err:
+        raise_error(settings, logger, program=settings.PROGRAM, hostname=settings.HOSTNAME,
+                    message=f"{err}\n{traceback.format_exc()}", do_error_exit=True)
 
 
 class Settings(object):
@@ -118,6 +121,9 @@ def get_settings():
     settings['HOSTNAME'] = os.getenv('NX_HOSTNAME', "Unknown")
     # Get program name (without extension so that telegram does not convert the program name into a link)
     settings['PROGRAM'] = os.path.splitext(os.path.basename(__file__))[0]
+    settings['ZM_TELEGRAM_NOTIF'] = os.getenv("ZM_TELEGRAM_NOTIF", 'True').lower() in 'true'
+    settings['ZM_TELEGRAM_CHAT'] = os.getenv('ZM_TELEGRAM_CHAT', "Unknown")
+    settings['ZM_TELEGRAM_BOT_TOKEN'] = os.getenv('ZM_TELEGRAM_BOT_TOKEN', "Unknown")
     settings = Settings(settings)
 
 
