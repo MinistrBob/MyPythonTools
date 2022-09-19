@@ -4,6 +4,18 @@ nx-repository-view-raw-raw-test-*
 nx-setting-read
 ```
 
+# Docker
+## Docker build (example for me)
+```commandline
+cd c:\MyGit\MyPythonTools\Nexus
+docker build . -t ministrbob/nexus-repo-cleaner:latest
+docker push ministrbob/nexus-repo-cleaner:latest
+```
+## Docker run (example for Windows)
+```commandline
+docker run --rm -it -e MIKROTIK_BACKUP_PATH="/backup" -v c:\!SAVE\backup\:/backup ministrbob/mikrotik-backup:latest
+```
+
 # How to generate swagger-client client and use it
 Генерация Python клиента с помощью Swagger.  
 ```
