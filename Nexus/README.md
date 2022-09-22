@@ -11,7 +11,8 @@ cd c:\MyGit\MyPythonTools\Nexus
 docker build . -t ministrbob/nexus-repo-cleaner:latest
 docker push ministrbob/nexus-repo-cleaner:latest
 ```
-## Docker run (example for Windows)
+## Docker container install and run on server
+
 ```commandline
 docker run --rm -it -e MIKROTIK_BACKUP_PATH="/backup" -v c:\!SAVE\backup\:/backup ministrbob/mikrotik-backup:latest
 ```

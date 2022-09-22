@@ -16,6 +16,8 @@ logger = logging.getLogger()
 
 
 def main():
+    mine_time = datetime.now()
+
     # Get app settings
     try:
         get_settings()
@@ -38,6 +40,7 @@ def main():
     repos = rules_yaml['repos']
 
     try:
+        count = 0
         # Обрабатываем каждый репозиторий
         for repo in repos:
             logger.info(f"Work with {repo} repo")
@@ -71,18 +74,19 @@ def main():
             logger.info(f"Apply include_rules")
             include_rules = repos[repo]['include_rules']
             logger.debug(include_rules)
-            for rule in include_rules:
+            for rule in include_rules:  # Цикл по каждому правилу
                 rule_rule = rule['rule']
                 logger.debug(f" ")
                 logger.debug(f"    {type(rule_rule)} | {rule_rule}")
-                for name in list(result.keys()):
+                for name in list(result.keys()):  # Выбираем из списка всех образов те которые соответствуют правилу
                     if re.search(rule_rule, name):
                         logger.debug(f"    {rule_rule} | {name}")
 
                         logger.info(f"Save last {rule['last']} images")
                         # Сортируем list of components (NexusComponent) по reverse last_modified и берём всё что далее last.
+                        # Т.е. сохраняем [rule['last'] образов.
                         result[name].sort(reverse=True, key=lambda comp: comp.last_modified)
-                        for i in result[name][0:10]:
+                        for i in result[name][0:rule['last']]:
                             logger.debug(f"    {i.name}:{i.version} | {i.last_modified}")
                         list_for_check_days = result[name][rule['last']:]
 
@@ -92,9 +96,23 @@ def main():
                             if (datetime.now(timezone.utc) - comp.last_modified).days > rule['days']:
                                 logger.info(f"Delete component {comp.name}:{comp.version} | {comp.last_modified}")
                                 nexus.delete(id=comp.id)
+                                count += 1
     except Exception as err:
+        result = {'cleaner-result': 1, 'cleaner-time': 0, 'cleaner-count': 0}
+        zabbix_sender(settings, logger, result)
         raise_error(settings, logger, program=settings.PROGRAM, hostname=settings.HOSTNAME,
                     message=f"{err}\n{traceback.format_exc()}", do_error_exit=True)
+
+    time_execution = round((datetime.now() - mine_time).total_seconds())
+    logger.info(f"Process executed in {time_execution} sec.")
+    # Send Zabbix info
+    if settings.ZM_ZABBIX_SEND:
+        try:
+            result = {'cleaner-result': 0, 'cleaner-time': time_execution, 'cleaner-count': count}
+            zabbix_sender(settings, logger, result)
+        except Exception as err:
+            raise_error(settings, logger, program=settings.PROGRAM, hostname=settings.HOSTNAME,
+                        message=f"Cannot send data to Zabbix\n{err}\n{traceback.format_exc()}", do_error_exit=True)
 
 
 class Settings(object):
@@ -117,13 +135,34 @@ def get_settings():
     settings['nexus_username'] = os.getenv('NX_USERNAME', "Unknown")
     settings['nexus_password'] = os.getenv('NX_PASSWORD', "Unknown")
     settings['nexus_repo'] = os.getenv('NX_REPO', "Unknown")
-    settings['DEV'] = os.getenv("NX_DEV", 'False').lower() in 'true'
-    settings['HOSTNAME'] = os.getenv('NX_HOSTNAME', "Unknown")
     # Get program name (without extension so that telegram does not convert the program name into a link)
     settings['PROGRAM'] = os.path.splitext(os.path.basename(__file__))[0]
+    # Telegram settings
     settings['ZM_TELEGRAM_NOTIF'] = os.getenv("ZM_TELEGRAM_NOTIF", 'True').lower() in 'true'
     settings['ZM_TELEGRAM_CHAT'] = os.getenv('ZM_TELEGRAM_CHAT', "Unknown")
     settings['ZM_TELEGRAM_BOT_TOKEN'] = os.getenv('ZM_TELEGRAM_BOT_TOKEN', "Unknown")
+    # Zabbix settings
+    # Should app send data to Zabbix?
+    settings['ZM_ZABBIX_SEND'] = os.getenv("ZM_ZABBIX_SEND", 'True').lower() in 'true'
+    # Zabbix server ip address.
+    settings['ZM_ZABBIX_IP'] = os.getenv('ZM_ZABBIX_IP', None)
+    # Zabbix "Host name". How is the host named in Zabbix.
+    settings['ZM_ZABBIX_HOST_NAME'] = os.getenv('ZM_ZABBIX_HOST_NAME', None)
+    # Add settings
+    settings['DEV'] = os.getenv("NX_DEV", 'False').lower() in 'true'
+    settings['HOSTNAME'] = settings['ZM_ZABBIX_HOST_NAME']
+
+    # Check required setting
+    if settings.ZM_TELEGRAM_NOTIF and \
+            (not settings.ZM_TELEGRAM_BOT_TOKEN or not settings.ZM_TELEGRAM_CHAT):
+        print(f"ERROR: Telegram notifications are enabled but the parameters ZM_TELEGRAM_BOT_TOKEN, ZM_TELEGRAM_CHAT "
+              f"are not defined")
+        exit(1)
+    if settings.ZM_ZABBIX_SEND and \
+            (not settings.ZM_ZABBIX_IP or not settings.ZM_ZABBIX_HOST_NAME or not settings.ZM_ZABBIX_ITEM_NAME):
+        print(f"ERROR: Send data to Zabbix are enabled but the parameters ZM_ZABBIX_IP, ZM_ZABBIX_HOST_NAME, "
+              f"ZM_ZABBIX_ITEM_NAME are not defined")
+        exit(1)
     settings = Settings(settings)
 
 
