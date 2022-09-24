@@ -29,9 +29,9 @@ class NexusHelper(object):
     def __str__(self):
         return f"host={self.configuration.host}|username={self.configuration.username}|bat={self.bat}"
 
-    def delete_component(self, id_=None):
+    def delete_component(self, comp_id=None):
         api_instance = swagger_client.ComponentsApi(self.api_client)
-        api_instance.delete_component(id=id_)
+        api_instance.delete_component(id=comp_id)
 
     def download_tags(self, download_url=None) -> NoReturn:
         """

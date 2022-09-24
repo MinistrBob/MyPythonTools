@@ -7,7 +7,7 @@ import traceback
 import yaml
 from datetime import datetime, timedelta, timezone
 from nexus_helper.nexus_helper import NexusHelper
-from zmpe import raise_error
+from zmpe import raise_error, zabbix_sender
 
 # Program settings
 settings = {}
@@ -95,7 +95,7 @@ def main():
                             # logger.debug(f"    {comp.name}:{comp.version} | {comp.last_modified}")
                             if (datetime.now(timezone.utc) - comp.last_modified).days > rule['days']:
                                 logger.info(f"Delete component {comp.name}:{comp.version} | {comp.last_modified}")
-                                nexus.delete(id=comp.id)
+                                nexus.delete_component(comp_id=comp.id)
                                 count += 1
     except Exception as err:
         result = {'cleaner-result': 1, 'cleaner-time': 0, 'cleaner-count': 0}
@@ -152,6 +152,8 @@ def get_settings():
     settings['DEV'] = os.getenv("NX_DEV", 'False').lower() in 'true'
     settings['HOSTNAME'] = settings['ZM_ZABBIX_HOST_NAME']
 
+    settings = Settings(settings)
+
     # Check required setting
     if settings.ZM_TELEGRAM_NOTIF and \
             (not settings.ZM_TELEGRAM_BOT_TOKEN or not settings.ZM_TELEGRAM_CHAT):
@@ -159,11 +161,10 @@ def get_settings():
               f"are not defined")
         exit(1)
     if settings.ZM_ZABBIX_SEND and \
-            (not settings.ZM_ZABBIX_IP or not settings.ZM_ZABBIX_HOST_NAME or not settings.ZM_ZABBIX_ITEM_NAME):
-        print(f"ERROR: Send data to Zabbix are enabled but the parameters ZM_ZABBIX_IP, ZM_ZABBIX_HOST_NAME, "
-              f"ZM_ZABBIX_ITEM_NAME are not defined")
+            (not settings.ZM_ZABBIX_IP or not settings.ZM_ZABBIX_HOST_NAME):
+        print(f"ERROR: Send data to Zabbix are enabled but the parameters ZM_ZABBIX_IP, "
+              f"ZM_ZABBIX_HOST_NAME are not defined")
         exit(1)
-    settings = Settings(settings)
 
 
 def set_logger():

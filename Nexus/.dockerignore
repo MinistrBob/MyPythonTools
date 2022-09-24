@@ -4,7 +4,8 @@ venv
 Dockerfile
 SETTINGS.py
 mynexus*.py
-test.py
+test*.py
+rules.yaml
 *.yaml
 *.pyc
 *.pyo
