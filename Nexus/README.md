@@ -65,9 +65,10 @@ MAILTO=""
 cd c:\MyGit\MyPythonTools\Nexus
 pip install --upgrade zmpe
     pip freeze | Out-File -Encoding UTF8 c:\MyGit\MyPythonTools\Nexus\requirements.txt
-docker build . -t ministrbob/nexus-repo-cleaner:latest --progress=plain --no-cache
+docker build . -t ministrbob/nexus-repo-cleaner:latest --progress=plain --pull --rm --no-cache
+docker login -u "ministrbob" -p "dFG0ktPG#a1Xdm$O"
 docker push ministrbob/nexus-repo-cleaner:latest
-```
+``` 
 
 # How to generate swagger-client client and use it
 Генерация Python клиента с помощью Swagger.  
