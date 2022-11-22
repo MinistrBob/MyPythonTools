@@ -56,7 +56,7 @@ docker.io/ministrbob/nexus-repo-cleaner:latest
 If you use cronjob or if you use sudo -s or su you will need `source` command
 ```commandline
 MAILTO=""
-0 3 * * * source /home/cleaner/.bash_profile; python3 /opt/nexus_repo_cleaner/zabbix-monitoring-programs-execution/zm.py 2>&1
+0 3 * * * source /home/cleaner/.bash_profile; docker run --rm -v /opt/nexus_repo_cleaner/rules.yaml:/app/rules.yaml -e NX_DEBUG=$NX_DEBUG -e NX_HOST=$NX_HOST -e NX_USERNAME=$NX_USERNAME -e NX_PASSWORD=$NX_PASSWORD -e NX_REPO=$NX_REPO -e NX_DEV=$NX_DEV -e ZM_TELEGRAM_NOTIF=$ZM_TELEGRAM_NOTIF -e ZM_TELEGRAM_CHAT=$ZM_TELEGRAM_CHAT -e ZM_TELEGRAM_BOT_TOKEN=$ZM_TELEGRAM_BOT_TOKEN -e ZM_ZABBIX_SEND=$ZM_ZABBIX_SEND -e ZM_ZABBIX_HOST_NAME=$ZM_ZABBIX_HOST_NAME -e ZM_ZABBIX_IP=$ZM_ZABBIX_IP docker.io/ministrbob/nexus-repo-cleaner:latest >> /home/cleaner/nexus_repo_cleaner.log
 ```
 
 # Docker
