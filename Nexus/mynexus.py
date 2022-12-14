@@ -35,18 +35,19 @@ def main():
     logger.debug(bat)
     api_client = swagger_client.ApiClient(configuration=configuration, header_name='Authorization', header_value=bat)
     #
-    upload_file(api_client)
+    # upload_file(api_client)
     #
     # Download all files from RAW repo
-    # result = get_components(api_client)
+    result = get_components(api_client)
     # show_raw(result)
-    # show_docker(result)
+    show_docker(result)
 
 
 def show_docker(result):
     for page in result:
         for item in page.items:  # PageComponentXO
-            if item.name == "platform-public-front/platform-public-front":
+            if True:
+            # if item.name == "platform-public-front/platform-public-front":
                 tag = f"{item.name}\t{item.id}\t{item.version}"
                 for asset in item.assets:  # ComponentXO
                     print(f"{tag}\t{asset.last_modified}")
@@ -77,7 +78,8 @@ def download_file(path, download_url):
 
 def upload_file(api_client):
     api_instance = swagger_client.ComponentsApi(api_client)
-    api_instance.upload_component(repository=settings.NX_REPO, raw_directory='/', raw_asset1=r'c:\!SAVE\tags.yaml', raw_asset1_filename='tags.yaml')
+    api_instance.upload_component(repository=settings.NX_REPO, raw_directory='/', raw_asset1=r'c:\!SAVE\tags.yaml',
+                                  raw_asset1_filename='tags.yaml')
 
 
 def get_components(api_client):
@@ -125,7 +127,14 @@ def get_settings():
     settings['NX_HOST'] = os.getenv('NX_HOST', "Unknown")
     settings['NX_USERNAME'] = os.getenv('NX_USERNAME', "Unknown")
     settings['NX_PASSWORD'] = os.getenv('NX_PASSWORD', "Unknown")
-    settings['NX_REPO'] = os.getenv('NX_REPO', "Unknown")
+    # settings['NX_REPO'] = os.getenv('NX_REPO', "Unknown")
+
+    #settings['NX_DEBUG'] = os.getenv("NX_DEBUG", 'False').lower() in 'true'
+    #settings['NX_HOST'] = '172.26.12.108'
+    #settings['NX_USERNAME'] = 'platform-worker'
+    #settings['NX_PASSWORD'] = 'Gy8Sb_ERxq5Bs*T9'
+    settings['NX_REPO'] = 'minust-pp-docker'
+
     settings = Settings(settings)
 
 

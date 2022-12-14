@@ -23,7 +23,7 @@ def main():
     # create an instance of the API class
     nexus = NexusHelper(settings, logger)
     #
-    nexus.get_list_component_pages()
+    # nexus.get_list_component_pages()
     #
     # nexus.upload_tags(local_file=r"c:\!SAVE\tags.yaml")
     #
