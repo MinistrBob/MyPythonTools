@@ -13,7 +13,7 @@ def replace_strings_in_file(file_path):
     # Read the file, replace strings, and write the modified content back
     with open(file_path, 'r', encoding='utf-8') as file:
         # lines = [re.sub(pattern, new_string, line) if line.startswith("![") else line for line in file]
-        lines = [line.replace("_resources", "attachments").replace(".resources", "") if line.startswith("![") else line for line in file]
+        lines = [line.replace("_resources", "attachments").replace(".resources", "") if r"![" in line else line for line in file]
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.writelines(lines)
@@ -31,7 +31,7 @@ def replace_content_in_parentheses(input_string, replacement):
 
 def get_path_from_link(input_string):
     # Define a regular expression pattern to match content within parentheses
-    pattern = r'^!\[.*?\]\((.*?)\)'
+    pattern = r'!\[.*?\]\((.*?)\)'
 
     # Use re.search to find the first match
     match = re.search(pattern, input_string)
@@ -205,7 +205,7 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                         links = []
                         with open(file_path, 'r', encoding='utf-8') as md_file:
                             for line in md_file:
-                                if line.startswith("!["):
+                                if r"![" in line:
                                     links.append(get_path_from_link(line))
                             print(f"    Links: {links}")
                         # Если у документа нет ссылок тогда мы его просто переносим в папку destination_path/tag
@@ -222,18 +222,24 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                                 shutil.move(file_path, dest_tag_dir)
                         else:
                             if not dry:
+                                print("Create attachments folder: " + dest_tag_dir)
                                 create_tag_folders(["attachments"], dest_tag_dir)
                             # Перемещение вложений
                             for link in links:
                                 # Выделить из ссылки имя папки и имя файла
                                 link = link.split("/")
+                                print(f"Link parts: {link}")
                                 # Так будет называться папка вложений на новом месте
-                                dest_attach_dir_name = link[-2].rstrip(r".resources")
+                                dest_attach_dir_name = link[-2].replace(".resources", "")
                                 # Имя файла вложения. В некоторых ссылках имена файлов идут как URL-encoded string,
                                 # поэтом производиться декодирование имени файла.
                                 dest_attach_file_name = unquote(link[-1], encoding='utf-8')
+                                print(f"dest_attach_dir_name={dest_attach_dir_name}")
+                                print(f"dest_attach_file_name={dest_attach_file_name}")
                                 # Создать папку для вложений конкретной заметки в папке destination_path/tag/attachments
-                                create_tag_folders([dest_attach_dir_name], os.path.join(dest_tag_dir, "attachments"))
+                                if not dry:
+                                    print("Create note attache folder: " + dest_tag_dir)
+                                    create_tag_folders([dest_attach_dir_name], os.path.join(dest_tag_dir, "attachments"))
                                 # Перенести вложение в папку destination_path/tag/attachments/folder_name
                                 ## Исходный путь к файлу вложения (dest_attach_file_name сюда подходит,
                                 # потому что исходное и целевое имя файла одно и тоже).
@@ -241,15 +247,22 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                                 ## Целевой путь к целевой папке вложений и файлу вложения.
                                 dest_attach_dir = os.path.join(dest_tag_dir, "attachments", dest_attach_dir_name)
                                 dest_attach_file = os.path.join(dest_attach_dir, dest_attach_file_name)
+                                print(f"source_attach_file={source_attach_file}")
+                                print(f"dest_attach_dir={dest_attach_dir}")
+                                print(f"dest_attach_file={dest_attach_file}")
                                 print(f"    Moving attach: {source_attach_file} to {dest_attach_file}")
                                 if not dry:
-                                    shutil.move(source_attach_file, dest_attach_file)
+                                    try:
+                                        shutil.move(source_attach_file, dest_attach_file)
+                                    except FileNotFoundError:
+                                        print(f"File not found: {source_attach_file}")
                             # Перемещение заметки
                             if not dry:
                                 replace_strings_in_file(file_path)
                             print(f"    Moving file: {file_path} to {dest_tag_dir}")
                             if not dry:
                                 shutil.move(file_path, dest_tag_dir)
+                            # TODO копировать оставшиеся вложения в папку destination_path/tag/attachments/folder_name и удалять папку.
 
 
 if __name__ == '__main__':
