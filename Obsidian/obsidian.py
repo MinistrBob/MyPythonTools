@@ -251,6 +251,46 @@ def delete_attach_folder(source_dir, dest_dir):
         print(f"{source_dir} does not exist or is not a directory.")
 
 
+def remove_parentheses(data_path, dry=True):
+    for foldername, subfolders, filenames in os.walk(data_path):
+        for filename in filenames:
+            if filename.endswith('.md') and ('(' in filename or ')' in filename):
+                print(f"Filename: {filename}")
+                # Task 1: Имя файла, где все проблемы заменяются на _
+                md_name_without_spaces = filename.replace(' ', '_')
+                template_name = md_name_without_spaces.rstrip('.md')
+                print(f"  md_name_without_spaces ={md_name_without_spaces}")
+                print(f"  template_name={template_name}")
+
+                # Task 2: Find and rename the corresponding folder
+                resources_folder_path = os.path.join(data_path, '_resources', f"{template_name}.resources")
+                print(f"  Find dir: {resources_folder_path}")
+                new_resources_folder_path = resources_folder_path.replace('(', '').replace(')', '')
+                print(f"  new_resources_folder_path={new_resources_folder_path}")
+                if os.path.exists(resources_folder_path):
+
+                    print(f"  Rename dir: {resources_folder_path} to {new_resources_folder_path}")
+                    if not dry:
+                        os.rename(resources_folder_path, new_resources_folder_path)
+
+                # Task 3: Open and modify the contents of the md file
+                md_file = os.path.join(foldername, filename)
+                print(f"  Replace content: {md_file}")
+                if not dry:
+                    with open(md_file, 'r', encoding='utf-8') as f:
+                        md_content = f.read()
+                        modified_content = md_content.replace(template_name,
+                                                              template_name.replace('(', '').replace(')', ''))
+
+                    with open(md_file, 'w', encoding='utf-8') as f:
+                        f.write(modified_content)
+
+                # Task 4: Rename the md file itself
+                new_md_file = os.path.join(foldername, filename.replace('(', '').replace(')', ''))
+                print(f"  Rename md: {md_file} to {new_md_file}")
+                if not dry:
+                    os.rename(md_file, new_md_file)
+
 
 def move_md_files(data_path, tags, destination_path, dry=True):
     """
@@ -397,7 +437,7 @@ if __name__ == '__main__':
     # process_md_files(DATA_PATH, get_tags_from_md)
 
     # (в текущем примере) выводит список ссылок "![" из md файла.
-    process_md_files(DATA_PATH, work_with_links_in_md_files)
+    # process_md_files(DATA_PATH, work_with_links_in_md_files)
 
     # find_long_filepath(DATA_PATH)
 
@@ -412,6 +452,10 @@ if __name__ == '__main__':
     #                          r"./_resources/О_готовности_программного_токена.resources/Инструкция%20по%20работе%20в%20среде%20MacOS.pdf".lstrip(
     #                              r'./'))
     # print(test_path)
+
+    # Убрать все скобки из названий файлов и из ссылок в md файлах.
+    # remove_parentheses(DATA_PATH, dry=True)
+    remove_parentheses(DATA_PATH, dry=False)
 
     # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ"
     # move_md_files(DATA_PATH, ["#SharePoint"], destination_path)
