@@ -109,11 +109,13 @@ def find_long_filepath(folder_path):
                 print(file_path)
 
 
-def process_md_files(folder_path):
+def process_md_files(folder_path, func):
     """
     (вспомогательное) Обход файлового дерева начиная с folder_path и обработка каждого *.md файла.
     В данном случае печать списка тегов для файла.
-
+    file_path: d:\YandexDisk\ObsidianVault\MainVault\@ ХРАНИЛИЩЕ\! Включение серверов по iLO SSH.md
+    relative_path: ! Включение серверов по iLO SSH.md
+    :param func:
     :param folder_path: The path to the folder to start traversing from.
     """
     # Walk through the directory tree
@@ -123,29 +125,74 @@ def process_md_files(folder_path):
             if filename.endswith(".md"):
                 file_path = os.path.join(foldername, filename)
                 relative_path = os.path.relpath(file_path, folder_path)
+                # print(f"file_path: {file_path}")
+                # print(f"relative_path: {relative_path}")
+                func(file_path, relative_path)
 
-                # Open the file and look for the 'tags' line
-                tags_list = []
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    for line in file:
-                        if line.startswith("tags:"):
-                            # Extract the tags using ast.literal_eval to safely parse the string
-                            tags_str = line.replace("tags:", "").strip()
-                            try:
-                                tags_list = ast.literal_eval(tags_str)
-                            except (SyntaxError, ValueError):
-                                print(f"    Error parsing tags in file: {relative_path}")
-                            break
-                    if not tags_list:
-                        # Print relative path
-                        print(f"File: {relative_path}")
-                        print(f"    No tags found in file: {relative_path}")
-                    else:
-                        # Print relative path
-                        # print(f"File: {relative_path}")
-                        # Print the list of tags
-                        # print(f"    Tags: {tags_list}")
-                        pass
+
+def work_with_links_in_md_files(file_path, relative_path):
+    """
+    Вывести список ссылок "![" из md файла.
+    :param file_path:
+    :param relative_path:
+    :return:
+    """
+    links = []
+    with open(file_path, 'r', encoding='utf-8') as md_file:
+        for line in md_file:
+            if r"![" in line:
+                links.append(line)
+    if links:
+        # print(f"File: {relative_path}")
+        report = []
+        for link in links:
+            # print(f"  {link}")
+            link_parts = link.split("/")
+            try:
+                index_of_resources = link_parts.index("_resources")
+            except ValueError:
+                report.append(f"NO RESOURCES: link={link}")
+                continue
+            attach_dir = link_parts[index_of_resources + 1]
+            attach_file = link_parts[index_of_resources + 2]
+            if ")]" in attach_file:
+                continue
+            if "(" in attach_dir or ")" in attach_dir or "(" in attach_file or ")" in attach_file:
+                report.append(f"link={link}")
+        if report:
+            print(f"File: {relative_path}")
+            for i in report:
+                print(f"  {i}")
+
+
+def get_tags_from_md(file_path, relative_path):
+    """
+    (вспомогательное) Находит в файле md теги и печатает их. Или выводит сообщение об отсутствии тегов.
+    :param file_path:
+    :param relative_path:
+    :return:
+    """
+    tags_list = []
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            if line.startswith("tags:"):
+                # Extract the tags using ast.literal_eval to safely parse the string
+                tags_str = line.replace("tags:", "").strip()
+                try:
+                    tags_list = ast.literal_eval(tags_str)
+                except (SyntaxError, ValueError):
+                    print(f"    Error parsing tags in file: {relative_path}")
+                break
+        if not tags_list:
+            # Print relative path
+            print(f"File: {relative_path}")
+            print(f"    No tags found in file: {relative_path}")
+        else:
+            # Print relative path
+            # print(f"File: {relative_path}")
+            # Print the list of tags
+            # print(f"    Tags: {tags_list}")
+            pass
 
 
 def create_tag_folders(tags, destination_path):
@@ -204,6 +251,7 @@ def delete_attach_folder(source_dir, dest_dir):
         print(f"{source_dir} does not exist or is not a directory.")
 
 
+
 def move_md_files(data_path, tags, destination_path, dry=True):
     """
     Перенос *.md файлов с заданными тегами. В папке destination_path создаются подпапки с тегами.
@@ -253,11 +301,15 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                                     print(f"link line: {line}")
                                     # Получаем ссылку и проверяем ее на корректность, если она корректна то добавляем в список,
                                     # если нет, пробуем другие варианты pattern.
-                                    res = get_path_from_link(line, pattern=r'!\[.*?\]\((.*)\)')
+                                    # Вариант ссылки в круглых скобках:
+                                    # [![](./_resources/Глобальные_платформы_для_Фрилансеров_-The_Most_Popular_Platforms.1.resources/unknown_filename.png)](https://blog.payoneer.com/ru/author/richardcl/)
+                                    res = get_path_from_link(line, pattern=r'!\[.*?\]\((.*?)\)')
                                     print(f"    res1: {res}")
                                     if res and check_link(res):
                                         links.append(res)
                                     else:
+                                        # Вариант ссылки в квадратных скобках:
+                                        # [![[./_resources/Совместная_работа_с_документами_SharePoint_2016,_Office_Online_и_все-все-все._Часть_1._Что_это__Хабр.resources/embedded.83.svg]]](https://habr.com/ru/post/310396/#comment_9817182)
                                         res = get_path_from_link(line, pattern=r'!\[\[\s*(.*?)\s*\]\]')
                                         print(f"    res2: {res}")
                                         if res and check_link(res):
@@ -271,9 +323,9 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                             print("-" * 60)
                         # Если у документа нет ссылок тогда мы его просто переносим в папку destination_path/tag
                         # иначе переносим ещё и связанные с документом вложения.
-                        # Удалить символ # из имени тега.
+                        # Удалить символ # из имени тега и символы - заменить на пробелы.
                         if first_matching_tag.startswith('#'):
-                            first_matching_tag = first_matching_tag.lstrip('#')
+                            first_matching_tag = first_matching_tag.lstrip('#').replace('-', ' ')
                         # Целевая папка тега.
                         dest_tag_dir = os.path.join(destination_path, first_matching_tag)
                         if not links:
@@ -341,7 +393,11 @@ if __name__ == '__main__':
     # execution_time, result= count_md_files(DATA_PATH)
     # print(f"({execution_time} sec.) Number of *.md files: {result}")  # Number of *.md files: 7572
 
-    # process_md_files(DATA_PATH)
+    # (в текущем примере) выводит файлы md не имеющих тегов.
+    # process_md_files(DATA_PATH, get_tags_from_md)
+
+    # (в текущем примере) выводит список ссылок "![" из md файла.
+    process_md_files(DATA_PATH, work_with_links_in_md_files)
 
     # find_long_filepath(DATA_PATH)
 
@@ -357,6 +413,6 @@ if __name__ == '__main__':
     #                              r'./'))
     # print(test_path)
 
-    destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ"
     # move_md_files(DATA_PATH, ["#SharePoint"], destination_path)
-    move_md_files(DATA_PATH, ["#SharePoint"], destination_path, dry=False)
+    # move_md_files(DATA_PATH, ["#@-Аутсорсинг-Outsourcing"], destination_path, dry=False)
