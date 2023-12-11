@@ -4,6 +4,7 @@ import ast  # Used to safely parse the tags string
 import re
 import shutil
 from urllib.parse import unquote
+from typing import List, Optional
 
 
 def replace_strings_in_file(file_path):
@@ -292,18 +293,24 @@ def remove_parentheses(data_path, dry=True):
                     os.rename(md_file, new_md_file)
 
 
-def move_md_files(data_path, tags, destination_path, dry=True):
+def move_md_files(data_path: str, tags: List[str], destination_path: str, dry: bool = True, special_folder: str = None):
     """
     Перенос *.md файлов с заданными тегами. В папке destination_path создаются подпапки с тегами.
 
-    :param dry: Dry run, если True то реальные действия с файлами не производятся, это позволяет посмотреть список файлов.
+    :param special_folder: Если указано, то заметки переносятся в подпапку special_folder.
+    :type special_folder: List[str]
+    :param dry: Dry run, если True то реальные действия с файлами не производятся.
     :param destination_path: Папка где будет создаваться подпапка тега в которую будут перенесены *.md файлы.
     :param tags: Список тегов, *.md файлы которых будут перенесены.
     :param data_path: Путь к исходной папке где сейчас лежать *.md файлы.
     """
+    count = 0
     # Создать папки соответствующие тегам в destination_path если их нет.
     if not dry:
-        create_tag_folders(tags, destination_path)
+        if special_folder:
+            create_tag_folders([special_folder], destination_path)
+        else:
+            create_tag_folders(tags, destination_path)
     # Walk through the directory tree
     for foldername, subfolders, filenames in os.walk(data_path):
         for filename in filenames:
@@ -367,15 +374,18 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                         if first_matching_tag.startswith('#'):
                             first_matching_tag = first_matching_tag.lstrip('#').replace('-', ' ')
                         # Целевая папка тега.
-                        dest_tag_dir = os.path.join(destination_path, first_matching_tag)
+                        if special_folder:
+                            dest_tag_dir = os.path.join(destination_path, special_folder)
+                        else:
+                            dest_tag_dir = os.path.join(destination_path, first_matching_tag)
                         if not links:
                             # Перемещение заметки
                             print(f"    Moving file: {file_path} to {dest_tag_dir}")
                             if not dry:
                                 shutil.move(file_path, dest_tag_dir)
                         else:
+                            print("Create attachments folder: " + dest_tag_dir)
                             if not dry:
-                                print("Create attachments folder: " + dest_tag_dir)
                                 create_tag_folders(["attachments"], dest_tag_dir)
                             # Перемещение вложений
                             for link in links:
@@ -423,8 +433,9 @@ def move_md_files(data_path, tags, destination_path, dry=True):
                             print(f"    Moving file: {file_path} to {dest_tag_dir}")
                             if not dry:
                                 shutil.move(file_path, dest_tag_dir)
-
+                        count+=1
                         print(f"\n{'=' * 60}\n")
+    print(f"\nВсего обработано: {count} заметок.")
 
 
 if __name__ == '__main__':
@@ -455,8 +466,8 @@ if __name__ == '__main__':
 
     # Убрать все скобки из названий файлов и из ссылок в md файлах.
     # remove_parentheses(DATA_PATH, dry=True)
-    remove_parentheses(DATA_PATH, dry=False)
+    # remove_parentheses(DATA_PATH, dry=False)
 
-    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ"
-    # move_md_files(DATA_PATH, ["#SharePoint"], destination_path)
-    # move_md_files(DATA_PATH, ["#@-Аутсорсинг-Outsourcing"], destination_path, dry=False)
+    destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\ДЕНЕЖНЫЙ ПОТОК"
+    # move_md_files(DATA_PATH, ["#@@@-ИЗУЧЕНИЕ"], destination_path)
+    move_md_files(DATA_PATH, ["#Криптовалюта"], destination_path, dry=False)
