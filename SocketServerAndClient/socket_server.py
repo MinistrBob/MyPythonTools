@@ -1,6 +1,8 @@
 import socket
 import os
 import psutil
+import signal
+import sys
 from server_settings import app_settings as appset
 
 
@@ -45,7 +47,7 @@ def start_server():
 if __name__ == "__main__":
     # print_process()
     # close_clickermann()
-    
+
     # Register a signal handler for Ctrl+C
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     start_server()
