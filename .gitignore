@@ -234,3 +234,5 @@ GitLab/kube_config
 GitLab/id_rsa
 Nexus/tags.yaml
 Nexus/slim.report.json
+SocketServerAndClient/server_settings.py
+SocketServerAndClient/client_settings.py
