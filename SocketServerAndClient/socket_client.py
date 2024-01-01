@@ -1,9 +1,10 @@
 import socket
+from client_settings import app_settings as appset
 
 
 def send_command(command):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(('127.0.0.1', 12345))
+    client_socket.connect((appset.server_ip, appset.server_port))
 
     client_socket.send(command.encode('utf-8'))
 
