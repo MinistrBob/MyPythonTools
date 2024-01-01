@@ -37,6 +37,6 @@ def start_server():
 
 
 if __name__ == "__main__":
-    # start_server()
+    start_server()
     # print_process()
-    close_clickermann()
+    # close_clickermann()
