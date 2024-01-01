@@ -43,6 +43,10 @@ def start_server():
 
 
 if __name__ == "__main__":
-    start_server()
     # print_process()
     # close_clickermann()
+    
+    # Register a signal handler for Ctrl+C
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    start_server()
+
