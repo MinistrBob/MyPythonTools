@@ -24,16 +24,22 @@ def start_server():
 
     print(f"Server listening on [{appset.bind_ip}] port {appset.bind_port}...")
 
-    while True:
-        client_socket, client_address = server_socket.accept()
-        print(f"Connection from {client_address}")
+    try:
+        while True:
+            client_socket, client_address = server_socket.accept()
+            print(f"Connection from {client_address}")
 
-        data = client_socket.recv(1024).decode('utf-8')
+            data = client_socket.recv(1024).decode('utf-8')
 
-        if data == 'kill':
-            close_clickermann()
+            if data == 'kill':
+                close_clickermann()
 
-        client_socket.close()
+            client_socket.close()
+    except KeyboardInterrupt:
+        # Handle Ctrl+C
+        print("\nServer interrupted. Closing...")
+        server_socket.close()
+        sys.exit()
 
 
 if __name__ == "__main__":
