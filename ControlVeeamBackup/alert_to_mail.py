@@ -6,15 +6,15 @@ import SETTINGS
 from email.message import EmailMessage
 
 
-def send_email(receiver_emails, subject, message, logger, attached_file=None, sender_email=None, port=465):
+def send_email(receiver_emails, subject, message, logger, attached_file=None, sender_email=None):
     logger.debug(">>>>send_email.send_mail begin")
     logger.info("Sending email")
     # Create a secure SSL context
     context = ssl.create_default_context()
-    server = smtplib.SMTP_SSL("smtp.yandex.ru", port, context=context)
+    server = smtplib.SMTP_SSL(SETTINGS.settings['smtp_host'], SETTINGS.settings['smtp_port'], context=context)
     # Try connect to server
     try:
-        server.login(SETTINGS.settings['ymail_login'], SETTINGS.settings['ymail_password'])
+        server.login(SETTINGS.settings['smtp_login'], SETTINGS.settings['smtp_password'])
     except Exception:
         logger.error("ERROR: Can't connect to SMTP server:\n" + traceback.format_exc())
     msg = EmailMessage()
