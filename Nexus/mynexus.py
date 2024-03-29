@@ -130,10 +130,10 @@ def get_settings():
     # settings['NX_REPO'] = os.getenv('NX_REPO', "Unknown")
 
     #settings['NX_DEBUG'] = os.getenv("NX_DEBUG", 'False').lower() in 'true'
-    #settings['NX_HOST'] = '172.26.12.108'
-    #settings['NX_USERNAME'] = 'platform-worker'
-    #settings['NX_PASSWORD'] = 'Gy8Sb_ERxq5Bs*T9'
-    settings['NX_REPO'] = 'minust-pp-docker'
+    #settings['NX_HOST'] = ''
+    #settings['NX_USERNAME'] = ''
+    #settings['NX_PASSWORD'] = ''
+    settings['NX_REPO'] = ''
 
     settings = Settings(settings)
 
