@@ -61,7 +61,16 @@ class NexusHelper(object):
         """
         if local_file is None:
             local_file = self.tags_yaml
+            self.log.debug(f"local_file={local_file}")
         api_instance = swagger_client.ComponentsApi(self.api_client)
+        self.log.debug(f"\n"
+                       f"nexus_host={self.configuration.host}\n"
+                       f"nexus_username={self.configuration.username}\n"
+                       f"nexus_passwd={self.configuration.password}\n"
+                       f"repository={self.nexus_repo}\n"
+                       f"raw_directory={nexus_raw_directory}\n"
+                       f"raw_asset1={local_file}\n"
+                       f"raw_asset1_filename={nexus_raw_filename}\n")
         api_instance.upload_component(repository=self.nexus_repo, raw_directory=nexus_raw_directory,
                                       raw_asset1=local_file, raw_asset1_filename=nexus_raw_filename)
 

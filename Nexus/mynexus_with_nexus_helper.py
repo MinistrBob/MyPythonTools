@@ -25,9 +25,9 @@ def main():
     #
     # nexus.get_list_component_pages()
     #
-    # nexus.upload_tags(local_file=r"c:\!SAVE\tags.yaml")
+    nexus.upload_tags(local_file=r"c:\!SAVE\tags.yaml", nexus_raw_filename="test777.yaml")
     #
-    nexus.download_tags()
+    # nexus.download_tags()
 
 
 def set_logger():
