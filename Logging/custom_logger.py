@@ -59,10 +59,12 @@ def get_logger(settings):
 
     # Formation of custom_logger. Log everything to stdout, and if necessary, to a file.
     # log_formatter = logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(process)d:%(thread)d - %(message)s')
-    custom_logger = logging.getLogger("teleservice-logger")
+    custom_logger = logging.getLogger(settings.logger_name)
     custom_logger.setLevel(log_level)
     stdout_handler = logging.StreamHandler(sys.stdout)
-    fmt = r'%(asctime)s|%(levelname)-5s|%(funcName)s| %(message)s'
+    # Здесь LOGLEVEL выравнивается до 7 символов так нормально центруются все уровни кроме CRITICAL,
+    # но т.к. он редко используется им можно пренебречь
+    fmt = r'%(asctime)s|%(levelname)-7s|%(funcName)s| %(message)s'
     # stdout_handler.setFormatter(logging.Formatter(fmt))
     stdout_handler.setFormatter(CustomFormatter(fmt))
     custom_logger.addHandler(stdout_handler)
