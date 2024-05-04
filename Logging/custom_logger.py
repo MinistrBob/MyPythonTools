@@ -65,7 +65,13 @@ def get_logger(settings):
     # Здесь LOGLEVEL выравнивается до 7 символов так нормально центруются все уровни кроме CRITICAL,
     # но т.к. он редко используется им можно пренебречь
     fmt = r'%(asctime)s|%(levelname)-7s|%(funcName)s| %(message)s'
-    # stdout_handler.setFormatter(logging.Formatter(fmt))
+    # Ещё варианты форматирования (если ошибка выводится с traceback,
+    # то там есть информация о строках, поэтому для всех сообщений в этом нет смысла):
+    # fmt = r'%(asctime)s|%(levelname)-7s|%(name)s.%(module)s.%(funcName)s.%(lineno)s| %(message)s'
+    # Для форматтера можно указать формат даты и времени.
+    # datefmt = '%Y-%m-%d %H:%M'
+    # Здесь стандартный formatter и CustomFormatter
+    # stdout_handler.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
     stdout_handler.setFormatter(CustomFormatter(fmt))
     custom_logger.addHandler(stdout_handler)
     if settings.log_to_file:
