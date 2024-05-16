@@ -15,7 +15,18 @@ def sort_nodes(data):
     return sorted_data
 
 
-def sort_nodes_for_yaml_files_in_directory(directory, remove_nodes=False):
+def sort_keys_recursive(d):
+    """ Рекурсивная сортировка ключей в словаре """
+    if isinstance(d, dict):
+        sorted_dict = {}
+        for key in sorted(d.keys()):
+            sorted_dict[key] = sort_keys_recursive(d[key])
+        return sorted_dict
+    else:
+        return d
+
+
+def process_yaml_files_in_directory(directory, remove_nodes=False):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(".yaml") or file.endswith(".yml"):
@@ -33,11 +44,12 @@ def sort_nodes_for_yaml_files_in_directory(directory, remove_nodes=False):
                 else:
                     processed_data = data
                 # Сортировка узлов
-                processed_data = sort_nodes(processed_data)
+                processed_data = sort_keys_recursive(processed_data)
+                # processed_data = sort_nodes(processed_data)
                 # Запись yaml файла
                 if processed_data:
                     with open(file_path, 'w') as f:
-                        f.write(processed_data)
+                        f.write(yaml.dump(processed_data))
                     print(f"File processing was successful")
 
 
@@ -133,7 +145,7 @@ def remove_nodes_from_yaml(yaml_data):
 if __name__ == '__main__':
     # Сортировка узлов для всех yaml файлов в папке c:\!SAVE\DITMoscow\compare\work-compare\
     work_directory = r'c:\!SAVE\DITMoscow\compare\work-compare\prod'
-    sort_nodes_for_yaml_files_in_directory(work_directory, remove_nodes=True)
+    process_yaml_files_in_directory(work_directory, remove_nodes=True)
 
     # Сортировка узлов конкретного yaml файла
     # file_path = r'c:\!SAVE\DITMoscow\compare\helm-charts-backup\asuno-backend\templates\deployment.yaml'
