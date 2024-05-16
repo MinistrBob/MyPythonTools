@@ -1,35 +1,44 @@
 import os
 import yaml
-
-keys_to_remove = ['metadata.resourceVersion', 'metadata.uid', 'metadata.annotations',
-                  'metadata.creationTimestamp', 'metadata.selfLink']
+import copy
 
 
-def sort_nodes_in_one_yaml_file(file_path):
-    print(f"Process file {file_path}")
-    with open(file_path, 'r') as f:
-        try:
-            data = yaml.safe_load(f)
-        except Exception:
-            print(f"ERROR: can't READ the file")
-            return
+def sort_nodes(data):
+    """Сортирует узлы в yaml-файле"""
+    print("Sort data")
     try:
         sorted_data = yaml.dump(data, sort_keys=True)
     except Exception:
         print(f"ERROR: can't sort yaml data")
-        return
+        return None
 
-    with open(file_path, 'w') as f:
-        f.write(sorted_data)
-    print(f"File processing was successful")
+    return sorted_data
 
 
-def sort_nodes_for_yaml_files_in_directory(directory):
+def sort_nodes_for_yaml_files_in_directory(directory, remove_nodes=False):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(".yaml") or file.endswith(".yml"):
                 file_path = os.path.join(root, file)
-                sort_nodes_in_one_yaml_file(file_path)
+                print(f"Process file {file_path}")
+                # Чтение yaml файла
+                with open(file_path, 'r') as f:
+                    try:
+                        data = yaml.safe_load(f)
+                    except Exception:
+                        print(f"ERROR: can't READ the file")
+                # Удаление узлов
+                if remove_nodes:
+                    processed_data = remove_nodes_from_yaml(data)
+                else:
+                    processed_data = data
+                # Сортировка узлов
+                processed_data = sort_nodes(processed_data)
+                # Запись yaml файла
+                if processed_data:
+                    with open(file_path, 'w') as f:
+                        f.write(processed_data)
+                    print(f"File processing was successful")
 
 
 def split_yaml_documents(file_path):
@@ -81,6 +90,7 @@ def split_path_without_extension(full_path):
 
 
 def create_folder(folder_path):
+    """ Создает папку """
     try:
         os.makedirs(folder_path)
         print(f"Folder '{folder_path}' created successfully.")
@@ -89,16 +99,41 @@ def create_folder(folder_path):
         # print(f"Folder '{folder_path}' already exists.")
 
 
-def remove_keys_from_yaml(yaml_data, keys_to_remove):
-    for key in keys_to_remove:
-        if key in yaml_data:
-            del yaml_data[key]
+def remove_nodes_from_yaml(yaml_data):
+    """ Удаляет ключи из yaml-файла, заданные в списке keys_to_remove """
+    print("Remove nodes")
+    try:
+        del yaml_data["metadata"]["creationTimestamp"]
+    except Exception:
+        print(f"ERROR: can't remove metadata.creationTimestamp")
+    try:
+        del yaml_data["metadata"]["resourceVersion"]
+    except Exception:
+        print(f"ERROR: can't remove metadata.resourceVersion")
+    try:
+        del yaml_data["metadata"]["uid"]
+    except Exception:
+        print(f"ERROR: can't remove metadata.metadata.uid")
+    try:
+        del yaml_data["metadata"]["annotations"]
+    except Exception:
+        print(f"ERROR: can't remove metadata.metadata.annotations")
+    try:
+        del yaml_data["metadata"]["selfLink"]
+    except Exception:
+        print(f"ERROR: can't remove metadata.selfLink")
+    try:
+        del yaml_data["metadata"]["managedFields"]
+    except Exception:
+        print(f"ERROR: can't remove metadata.managedFields")
+
+    return yaml_data
 
 
 if __name__ == '__main__':
     # Сортировка узлов для всех yaml файлов в папке c:\!SAVE\DITMoscow\compare\work-compare\
-    work_directory = r'c:\!SAVE\DITMoscow\compare\work-compare'
-    sort_nodes_for_yaml_files_in_directory(work_directory)
+    work_directory = r'c:\!SAVE\DITMoscow\compare\work-compare\prod'
+    sort_nodes_for_yaml_files_in_directory(work_directory, remove_nodes=True)
 
     # Сортировка узлов конкретного yaml файла
     # file_path = r'c:\!SAVE\DITMoscow\compare\helm-charts-backup\asuno-backend\templates\deployment.yaml'
