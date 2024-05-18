@@ -60,6 +60,7 @@ def split_yaml_documents(file_path):
     :param file_path: Путь к исходному yaml файлу.
     :return: Список yaml документов.
     """
+    print(f"Split yaml documents from {file_path}")
     with open(file_path, 'r') as file:
         yaml_documents = file.read().split('---')
 
@@ -74,20 +75,23 @@ def split_yaml_documents(file_path):
         parsed_documents.append(parsed_document)
 
     directory_path, file_name = split_path_without_extension(file_path)
-
+    directory_path = os.path.join(directory_path, file_name)
+    print(f"directory_path: {directory_path}")
     create_folder(directory_path)
 
     for doc in parsed_documents:
         # Extract metadata.name from the document
-        file_name = doc.get('metadata', {}).get('name')
-        if not file_name:
+        kind = doc.get('kind').lower()
+        yaml_file_name = doc.get('metadata', {}).get('name')
+        if not yaml_file_name:
             print("Error: 'metadata.name' not found in the document.")
             continue
-
+        doc = sort_keys_recursive(doc)
         # Write the document to a YAML file
-        file_path = f"{os.path.join(directory_path, file_name)}.yaml"
+        file_path = f"{os.path.join(directory_path, yaml_file_name)}.{kind}.yaml"
         with open(file_path, 'w') as file:
             yaml.dump(doc, file)
+            print(f"File {file_path} was created successfully.")
 
 
 def split_path_without_extension(full_path):
@@ -107,8 +111,7 @@ def create_folder(folder_path):
         os.makedirs(folder_path)
         print(f"Folder '{folder_path}' created successfully.")
     except FileExistsError:
-        pass
-        # print(f"Folder '{folder_path}' already exists.")
+        print(f"Folder '{folder_path}' already exists.")
 
 
 def remove_nodes_from_yaml(yaml_data):
@@ -138,19 +141,23 @@ def remove_nodes_from_yaml(yaml_data):
         del yaml_data["metadata"]["managedFields"]
     except Exception:
         print(f"ERROR: can't remove metadata.managedFields")
+    try:
+        del yaml_data["status"]
+    except Exception:
+        print(f"ERROR: can't remove status")
 
     return yaml_data
 
 
 if __name__ == '__main__':
     # Сортировка узлов для всех yaml файлов в папке c:\!SAVE\DITMoscow\compare\work-compare\
-    work_directory = r'c:\!SAVE\DITMoscow\compare\work-compare\prod'
-    process_yaml_files_in_directory(work_directory, remove_nodes=True)
+    # work_directory = r'c:\!SAVE\DITMoscow\compare\temp'
+    # process_yaml_files_in_directory(work_directory, remove_nodes=True)
 
     # Сортировка узлов конкретного yaml файла
-    # file_path = r'c:\!SAVE\DITMoscow\compare\helm-charts-backup\asuno-backend\templates\deployment.yaml'
+    # file_path = r'c:\!SAVE\DITMoscow\compare\secret-from-internet.yaml'
     # sort_nodes_in_yaml_file(file_path)
 
-    # Example usage
-    # file_path = r'c:\!SAVE\DITMoscow\compare\asuno-backend.yaml'
-    # split_yaml_documents(file_path)
+    # Разделить один yaml файл на множество отдельных yaml файлов
+    file_path = r'c:\!SAVE\DITMoscow\compare\client-shuno.yaml'
+    split_yaml_documents(file_path)
