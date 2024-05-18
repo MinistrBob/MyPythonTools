@@ -174,7 +174,7 @@ def get_tags_from_md(folder_path):
     :param relative_path:
     :return:
     """
-    all_tags =[]
+    all_tags = []
     # Walk through the directory tree
     for foldername, subfolders, filenames in os.walk(folder_path):
         for filename in filenames:
@@ -398,7 +398,8 @@ def move_md_files(data_path: str, tags: List[str], destination_path: str, dry: b
                                         if res and check_link(res):
                                             links.append(res)
                                         else:
-                                            raise ValueError(f"Ни один из паттернов не подошёл, нужно искать другие")
+                                            raise ValueError(f"Ни один из паттернов не подошёл, нужно искать другие\n"
+                                                             f"Tag: {first_matching_tag} in file: {file_path}")
                                     print("-" * 60)
                             print(f"  Links: {links}")
                             for link in links:
@@ -469,7 +470,7 @@ def move_md_files(data_path: str, tags: List[str], destination_path: str, dry: b
                             print(f"  Move md file: {file_path} to {dest_tag_dir}")
                             if not dry:
                                 shutil.move(file_path, dest_tag_dir)
-                        count+=1
+                        count += 1
                         print(f"\n{'=' * 60}\n")
     print(f"\nВсего обработано: {count} заметок.")
 
@@ -506,17 +507,25 @@ if __name__ == '__main__':
 
     # ПУТИ
     # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ"
-    destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ"
-    tag_list = ["#Виртуализация-Virtualization", "#Vagrant", "#Virtualbox", "#VMware", "#VMware-PowerCLI",
-                "#VMware-ZZZ", "#VMware-administration", "#VMware-automation", "#VMware-backup", "#VMware-cluster",
-                "#VMware-errors", "#VMware-hardware", "#VMware-install", "#VMware-monitoring", "#VMware-tools",
-                "#VMware-vCenter", "#Изучение-VMWare", "#ovftool"]
-    # move_md_files(DATA_PATH, tag_list, destination_path)
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ\Telegram"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\САМОРАЗВИТИЕ"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ\ORACLE\Oracle errors"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ\WINDOWS\Remote Desktop"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\РАЗРАБОТКА ПО"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\РАЗРАБОТКА ПО\Python"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\WORK\Ай-Теко"
+    # destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\ИИ AI\Data Science"
+    destination_path = r"d:\YandexDisk\ObsidianVault\MainVault\АДМИНИСТРИРОВАНИЕ\SSH"
+
+    tag_list = ["#fail2ban", "#KiTTY", "#PuTTY", "#ssh-public-key-authentication", "#ssh-tunnel-tonnel"]
+    move_md_files(DATA_PATH, tag_list, destination_path, dry=True)
     move_md_files(DATA_PATH, tag_list, destination_path, dry=False)
 
     # Перенос шпаргалок
     """
-    DATA_PATH = r"d:\YandexDisk\ObsidianVault\MainVault\_Evernote_\шпаркгалка"
+    DATA_PATH = r"d:\YandexDisk\ObsidianVault\MainVault\_Evernote_\шпаргалка"
     destination_path = r"d:\YandexDisk\ObsidianVault\MainVault"
     tag_list = ["#@@@-ШПАРГАЛКИ"]
     move_md_files(DATA_PATH, tag_list, destination_path)
