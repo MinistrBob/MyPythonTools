@@ -241,3 +241,5 @@ Parsing/Scripts/**/*
 Parsing/temp.py
 Parsing/images.db
 Parsing/pyvenv.cfg
+Kafka/Scripts/**/*
+Kafka/pyvenv.cfg
