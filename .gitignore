@@ -237,3 +237,7 @@ Nexus/slim.report.json
 SocketServerAndClient/server_settings.py
 SocketServerAndClient/client_settings.py
 HTML/output.csv
+Parsing/Scripts/**/*
+Parsing/temp.py
+Parsing/images.db
+Parsing/pyvenv.cfg
