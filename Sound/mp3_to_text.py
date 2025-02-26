@@ -3,6 +3,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from multiprocessing import Pool, cpu_count
 
+
 # Функция для транскрибирования одного MP3 файла и сохранения результата в текстовый файл
 def transcribe_mp3_to_text(mp3_file, chunk_length=60):
     print(f"Конвертируем {mp3_file} в WAV формат...")
@@ -27,8 +28,8 @@ def transcribe_mp3_to_text(mp3_file, chunk_length=60):
         print(f"Обрабатываем фрагмент {i // chunk_length + 1}: с {i} по {i + chunk_length} секунд.")
 
         # Извлекаем фрагмент
-        chunk = audio[i*1000:(i+chunk_length)*1000]
-        chunk_wav_file = f"chunk_{i//chunk_length}.wav"
+        chunk = audio[i * 1000:(i + chunk_length) * 1000]
+        chunk_wav_file = f"chunk_{i // chunk_length}.wav"
         chunk.export(chunk_wav_file, format="wav")
         print(f"Фрагмент сохранен как {chunk_wav_file}.")
 
@@ -54,6 +55,7 @@ def transcribe_mp3_to_text(mp3_file, chunk_length=60):
 
     print(f"Транскрипция завершена для {mp3_file}. Результат сохранен в {text_file}.")
 
+
 # Функция для обработки всех файлов в папке и подпапках
 def process_folder(folder_path):
     mp3_files = []
@@ -63,6 +65,7 @@ def process_folder(folder_path):
                 mp3_files.append(os.path.join(root, file))
 
     return mp3_files
+
 
 # Функция для параллельной обработки с помощью multiprocessing
 def transcribe_files_in_parallel(folder_path):
@@ -77,8 +80,9 @@ def transcribe_files_in_parallel(folder_path):
     with Pool(num_cores) as pool:
         pool.map(transcribe_mp3_to_text, mp3_files)
 
+
 # Оборачиваем основной код в конструкцию if __name__ == "__main__":
 if __name__ == "__main__":
-    folder_path = r"d:\YandexDisk\!SAVE"
+    folder_path = r"d:\YandexDisk\!SAVE\ЛЕКЦИИ3"
     print("Начинаем параллельную транскрипцию файлов...")
     transcribe_files_in_parallel(folder_path)
