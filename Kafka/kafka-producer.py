@@ -34,7 +34,7 @@ def produce_messages(broker_address, topic_name, messages, sasl_username=None, s
             traceback.print_exc()
 
 if __name__ == "__main__":
-    #broker_address = "kafka-dev-0.kafka-headless-dev.gasps.svc.cluster.local:9092"
+    # broker_address = "kafka-dev-0.kafka-headless-dev.gasps.svc.cluster.local:9092"
     broker_address = "172.26.12.190:31301"
     topic_name = "connection-test"
     messages = ["Message3", "Message444"]

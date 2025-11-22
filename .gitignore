@@ -243,4 +243,5 @@ Parsing/images.db
 Parsing/pyvenv.cfg
 Kafka/Scripts/**/*
 Kafka/pyvenv.cfg
+Sound/chunk_*.wav
 Kafka/.gigaide/gigaide.properties
