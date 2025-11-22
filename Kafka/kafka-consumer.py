@@ -2,6 +2,7 @@ from kafka import KafkaConsumer
 import traceback
 
 def consume_messages(broker_address, topic_name, sasl_username=None, sasl_password=None):
+    consumer = None
     try:
         # Create KafkaConsumer with SASL/PLAIN authentication
         consumer = KafkaConsumer(
@@ -27,13 +28,15 @@ def consume_messages(broker_address, topic_name, sasl_username=None, sasl_passwo
     finally:
         # Ensure the consumer is closed
         try:
-            consumer.close()
+            if consumer is not None:
+                consumer.close()
         except Exception as e:
             print(f"Error closing Kafka consumer: {e}")
             traceback.print_exc()
 
 if __name__ == "__main__":
-    broker_address = "kafka-dev-0.kafka-headless-dev.gasps.svc.cluster.local:9092"
+    # broker_address = "kafka-dev-0.kafka-headless-dev.gasps.svc.cluster.local:9092"
+    broker_address = "172.26.12.190:31301"
     topic_name = "connection-test"
     # Use your SASL credentials here
     sasl_username = "admin"

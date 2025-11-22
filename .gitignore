@@ -243,3 +243,4 @@ Parsing/images.db
 Parsing/pyvenv.cfg
 Kafka/Scripts/**/*
 Kafka/pyvenv.cfg
+Kafka/.gigaide/gigaide.properties
