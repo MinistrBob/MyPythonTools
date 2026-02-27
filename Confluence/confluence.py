@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Union
 from settings import app_settings as appset
 
+log = appset.log
+
 try:
     import requests
     from requests.adapters import HTTPAdapter
@@ -29,6 +31,7 @@ def _request_json(
     params: Optional[Dict[str, str]] = None,
     timeout: float = appset.timeout,
 ) -> Dict:
+    log.info("Запрос JSON: %s params=%s", url, params)
     response = session.get(url, params=params, timeout=timeout)
     response.raise_for_status()
     return response.json()
@@ -42,8 +45,10 @@ def _iter_attachments(
 ) -> Iterable[Dict]:
     start = 0
     limit = 50
+    log.info("Запрос списка вложений: page_id=%s", page_id)
     while True:
         url = f"{base_url}/rest/api/content/{page_id}/child/attachment"
+        log.info("Пагинация вложений: start=%s limit=%s", start, limit)
         data = _request_json(
             session,
             url,
@@ -51,9 +56,11 @@ def _iter_attachments(
             timeout=timeout,
         )
         results = data.get("results", [])
+        log.info("Получено вложений: %s", len(results))
         for item in results:
             yield item
         if not data.get("_links", {}).get("next"):
+            log.info("Пагинация вложений завершена")
             break
         start += limit
 
@@ -73,12 +80,14 @@ def _download_attachment(
     download_url = f"{base_url}{download_rel}"
     out_path = out_dir / safe_name
 
+    log.info("Скачивание вложения: %s", title)
     with session.get(download_url, stream=True, timeout=timeout) as response:
         response.raise_for_status()
         with open(out_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=1024 * 1024):
                 if chunk:
                     f.write(chunk)
+    log.info("Вложение сохранено: %s", out_path)
     return out_path
 
 
@@ -90,16 +99,19 @@ def _save_page_html(
     timeout: float = appset.timeout,
 ) -> Path:
     url = f"{base_url}/rest/api/content/{page_id}"
+    log.info("Скачивание HTML страницы: page_id=%s", page_id)
     data = _request_json(session, url, params={"expand": "body.storage"}, timeout=timeout)
     html = data.get("body", {}).get("storage", {}).get("value", "")
     out_path = out_dir / f"page_{page_id}.html"
     out_path.write_text(html, encoding="utf-8")
+    log.info("HTML страницы сохранен: %s", out_path)
     return out_path
 
 
 def _save_metadata(data: Dict, out_dir: Path, page_id: str) -> Path:
     out_path = out_dir / f"page_{page_id}_meta.json"
     out_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    log.info("Метаданные страницы сохранены: %s", out_path)
     return out_path
 
 
@@ -110,6 +122,7 @@ def build_session(
     retries: int,
     backoff: float,
 ) -> requests.Session:
+    log.info("Инициализация HTTP-сессии: user=%s", username)
     session = requests.Session()
     session.auth = (username, password)
     session.verify = verify
@@ -128,10 +141,12 @@ def build_session(
     adapter = HTTPAdapter(max_retries=retry)
     session.mount("https://", adapter)
     session.mount("http://", adapter)
+    log.info("HTTP-сессия готова")
     return session
 
 
 def parse_args() -> argparse.Namespace:
+    log.info("Парсинг аргументов командной строки")
     parser = argparse.ArgumentParser(description="Скачивание страницы Confluence и вложений")
     parser.add_argument("--base-url", default=appset.base_url, help="Базовый URL Confluence")
     parser.add_argument("--page-id", default=appset.page_id, help="ID страницы")
@@ -166,24 +181,29 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    log.info("Старт загрузки Confluence")
     args = parse_args()
 
     username = args.username
     password = args.password
-    if not username:
-        username = input("Confluence login: ").strip()
-    if not password:
-        password = getpass("Confluence password: ")
+    if not username or not password:
+        log.error("Не заданы учетные данные Confluence. Заполните username/password в profiles.py или передайте через CLI.")
+        return 1
+    log.info("Используется пользователь: %s", username)
 
     out_dir = Path(__file__).parent / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
+    log.info("Каталог вывода: %s", out_dir)
 
     if args.insecure or appset.insecure:
         verify_value: Union[bool, str] = False
+        log.info("Проверка TLS отключена")
     elif args.ca_bundle:
         verify_value = str(Path(args.ca_bundle))
+        log.info("Используется CA bundle: %s", verify_value)
     else:
         verify_value = True
+        log.info("Проверка TLS включена")
 
     session = build_session(
         username,
@@ -194,6 +214,7 @@ def main() -> int:
     )
 
     page_url = f"{args.base_url}/rest/api/content/{args.page_id}"
+    log.info("Запрос страницы: %s", page_url)
     page_data = _request_json(
         session,
         page_url,
@@ -212,6 +233,7 @@ def main() -> int:
 
     attachments_dir = out_dir / "attachments"
     attachments_dir.mkdir(parents=True, exist_ok=True)
+    log.info("Каталог вложений: %s", attachments_dir)
 
     downloaded: List[Path] = []
     for attachment in _iter_attachments(
@@ -230,9 +252,9 @@ def main() -> int:
             )
         )
 
-    print(f"Сохранен HTML: {page_html_path}")
-    print(f"Сохранены метаданные: {meta_path}")
-    print(f"Скачано вложений: {len(downloaded)}")
+    log.info("Сохранен HTML: %s", page_html_path)
+    log.info("Сохранены метаданные: %s", meta_path)
+    log.info("Скачано вложений: %s", len(downloaded))
     return 0
 
 
