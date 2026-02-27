@@ -246,3 +246,4 @@ Sound/chunk_*.wav
 Kafka/.gigaide/gigaide.properties
 *.crt
 Confluence/profiles.py
+Confluence/db.ssc

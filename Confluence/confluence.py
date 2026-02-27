@@ -56,16 +56,14 @@ def _download_attachment(
     session: requests.Session,
     base_url: str,
     attachment: Dict,
-    out_dir: Path,
+    out_path: Path,
     timeout: float = appset.timeout,
 ) -> Path:
     title = attachment.get("title") or "attachment"
-    safe_name = title.replace("/", "_").replace("\\", "_")
     download_rel = attachment.get("_links", {}).get("download")
     if not download_rel:
         raise RuntimeError(f"Не найден download link для вложения: {title}")
     download_url = f"{base_url}{download_rel}"
-    out_path = out_dir / safe_name
 
     log.info("Скачивание вложения: %s", title)
     with session.get(download_url, stream=True, timeout=timeout) as response:
@@ -118,9 +116,8 @@ def main() -> int:
         return 1
     log.info("Используется пользователь: %s", username)
 
-    attachments_dir = Path(__file__).parent / appset.out / "attachments"
-    attachments_dir.mkdir(parents=True, exist_ok=True)
-    log.info("Каталог вложений: %s", attachments_dir)
+    output_path = Path.cwd() / appset.output_filename
+    log.info("Файл сохранения: %s", output_path)
 
     if appset.insecure:
         verify_value: Union[bool, str] = False
@@ -151,7 +148,7 @@ def main() -> int:
         session,
         appset.base_url,
         attachment,
-        attachments_dir,
+        output_path,
         timeout=appset.timeout,
     )
 
