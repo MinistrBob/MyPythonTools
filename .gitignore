@@ -247,3 +247,10 @@ Kafka/.gigaide/gigaide.properties
 *.crt
 Confluence/profiles.py
 Confluence/db.ssc
+Evernote/evernote-sdk-python-master/sample/django/evernote_oauth_sample/settings.py
+Evernote/settings.py
+Logging/SETTINGS.py
+Nexus/SETTINGS.py
+tgstat/settings.py
+VK/SETTINGS.py
+VMWare/settings.py
