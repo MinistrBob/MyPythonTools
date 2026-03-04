@@ -6,6 +6,7 @@
 cd /d c:\MyGit\MyPythonTools\Confluence
 "c:\Program Files\Python312\python.exe" -m venv .venv
 .venv\Scripts\activate
+
 ```
 
 # Запуск
@@ -27,21 +28,10 @@ cd /d c:\MyGit\MyPythonTools\Confluence
 .venv\Scripts\activate
 
 # Запуск с переменными окружения
-set CONFLUENCE_USER=USERNAME
-set CONFLUENCE_PASS=PASSWORD
-python confluence.py --page-id 127672967 --out out
+set APP_PROFILE=dev
 
-# Запуск с параметрами логина/пароля
-python confluence.py --page-id 127672967 --out out --username USERNAME --password PASSWORD
-
-# Отключение проверки сертификата (если требуется)
-python confluence.py --page-id 127672967 --out out --insecure
-
-# Указать CA bundle (PEM/CRT) для корректной проверки TLS
-python confluence.py --page-id 127672967 --out out --ca-bundle dmz-DMZ-AD1-CA.crt
-
-# Увеличить таймаут и количество повторов при сетевых сбоях
-python confluence.py --page-id 127672967 --out out --timeout 60 --retries 5 --retry-backoff 1.0
+python confluence.py
+python parser_db.py
 
 ```
 

@@ -1,5 +1,6 @@
 import json
 import sys
+from datetime import date
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -135,7 +136,9 @@ def main() -> int:
         return 1
 
     table_data = parse_confluence_table(html)
-    print(table_data)
+    today_key = date.today().strftime("%m-%d")
+    today_birthdays = [row for row in table_data if row.get("date2") == today_key]
+    print(today_birthdays)
     return 0
 
 
