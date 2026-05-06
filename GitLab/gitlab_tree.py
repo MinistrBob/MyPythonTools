@@ -16,7 +16,16 @@ gitlab_tree.py — Обход дерева групп и проектов GitLab
 
 Использование:
     python gitlab_tree.py [url] [output.csv]
+    # Вообще всё но там много лишнего
     python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd gitlab_tree.csv
+    # Поэтому конкретные группы
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/backend
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/devops
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/docs
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/frontend
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/geoalert
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/smev-client
+    python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/studio-tg
 
 Зависимости: python-gitlab, gitlab_app_conf.
 """
@@ -105,10 +114,16 @@ def walk_tree(gl: gitlab.Gitlab, root_path: str, callback):
 if __name__ == '__main__':
     # URL группы по умолчанию
     default_url = f"{conf.gitlab_url}/nspd"
-    default_output = "gitlab_tree.csv"
 
     input_url = sys.argv[1] if len(sys.argv) > 1 else default_url
-    output_file = sys.argv[2] if len(sys.argv) > 2 else default_output
+
+    # Имя CSV по умолчанию — последняя часть URL + .csv
+    # Например: https://...nspd/smev-client -> smev-client.csv
+    if len(sys.argv) > 2:
+        output_file = sys.argv[2]
+    else:
+        last_part = input_url.rstrip('/').split('/')[-1]
+        output_file = f"{last_part}.csv"
 
     # Извлекаем путь группы из URL
     # Пример: https://lab.hub.nspd.rosreestr.gov.ru/nspd/iteco -> nspd/iteco
@@ -131,11 +146,10 @@ if __name__ == '__main__':
     csv_writer.writeheader()
     csv_file.flush()
 
-    row_count = 0
+    row_count = [0]
 
     def collect(node_info):
-        nonlocal row_count
-        row_count += 1
+        row_count[0] += 1
         csv_writer.writerow(node_info)
         csv_file.flush()
         log.info(f"  {node_info['type']:7s} | {node_info['id']:<12} | {node_info['path']}")
@@ -145,7 +159,7 @@ if __name__ == '__main__':
 
     csv_file.close()
 
-    print(f"\nВсего записей: {row_count}")
+    print(f"\nВсего записей: {row_count[0]}")
     print(f"Сохранено в {output_file}")
 
     log.info("The end!")
