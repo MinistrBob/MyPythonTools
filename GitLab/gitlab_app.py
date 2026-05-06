@@ -1,3 +1,22 @@
+"""
+gitlab_app.py — Основной скрипт для работы с GitLab API.
+
+Подключается к GitLab API (python-gitlab), авторизуется с помощью токена из конфигурации,
+создаёт экземпляр обёртки MyGitLab и выполняет операции над проектами и их репозиториями
+(Container Registry).
+
+Доступные (закомментированные) операции:
+    - Получение списка репозиториев (Container Registry) в проекте.
+    - Получение списка тегов в конкретном репозитории.
+    - Вывод самых последних (максимальных) тегов в проекте.
+    - Массовый обход проектов из конфигурации с выводом репозиториев и последних тегов.
+
+Проекты и их ID задаются в конфигурационном модуле gitlab_app_conf (project_dict).
+Логирование осуществляется через common.custom_logger.
+
+Зависимости: python-gitlab, common.custom_logger, модуль GitLab (MyGitLab), gitlab_app_conf.
+"""
+
 import gitlab
 # import dateutil.parser
 import common.custom_logger as custom_logger

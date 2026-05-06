@@ -1,3 +1,17 @@
+"""
+get_members.py — Получение списка участников группы GitLab.
+
+Подключается к GitLab API (python-gitlab), авторизуется с помощью токена из конфигурации,
+получает полный список участников группы «nspd/iteco» (включая унаследованных через .members_all),
+и выводит их в консоль в табличном виде (ID, Username, Name, Access Level, State).
+Результат также сохраняется в CSV-файл «members.csv» с разделителем «;» для совместимости с Excel.
+
+Уровни доступа:
+    10 — Guest, 20 — Reporter, 30 — Developer, 40 — Maintainer, 50 — Owner
+
+Зависимости: python-gitlab, конфигурационный модуль gitlab_app_conf.
+"""
+
 import gitlab
 import logging
 import os

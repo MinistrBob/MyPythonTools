@@ -1,3 +1,31 @@
+"""
+mygitlab.py — Класс-обёртка MyGitLab для работы с GitLab API.
+
+Предоставляет методы для работы с проектами GitLab и их Container Registry:
+    - Получение списка репозиториев проекта.
+    - Получение списка тегов репозитория (сокращённый и полный с детальной информацией).
+    - Поиск самого последнего (по дате создания) тега в каждом репозитории проекта.
+    - Вывод данных в консоль с настраиваемым отступом.
+    - Отображение прогресс-бара в терминале при длительных операциях.
+
+Конструктор принимает:
+    glo — объект gitlab.Gitlab (авторизованный клиент API).
+    log — объект логгера для записи отладочной информации.
+
+Методы:
+    get_list_project_repositories(project_id) — возвращает список репозиториев проекта.
+    print_list_project_repositories(project_id, indent) — выводит репозитории в консоль.
+    get_list_repository_tags(repo, full) — возвращает теги репозитория; при full=True
+        загружает полную информацию по каждому тегу.
+    print_list_repository_tags(repo, full, indent) — выводит теги в консоль.
+    get_max_tags_in_project(project_id) — для каждого репозитория проекта находит тег
+        с максимальной датой создания (требуется dateutil).
+    print_max_tags_in_project(project_id, indent) — выводит найденные теги в консоль.
+    printProgressBar(...) — утилита для отображения текстового прогресс-бара.
+
+Зависимости: python-gitlab, dateutil (для get_max_tags_in_project).
+"""
+
 class MyGitLab:
 
     def __init__(self, glo: object, log: object):
