@@ -2,6 +2,8 @@ import argparse
 import io
 import sys
 from datetime import date, timedelta
+from settings import app_settings as appset
+
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
@@ -19,8 +21,8 @@ PRIORITY_WEIGHT = {2: 0, 1: 1, 0: 2, 3: 3}
 def _priority_key(priority):
     return PRIORITY_WEIGHT.get(priority, 9)
 
-API_BASE = "https://api.weeek.net/public/v1"
-TOKEN = "0af3534c-6212-4044-b76f-e722b61e0234"
+API_BASE = appset.api_base
+TOKEN = appset.token
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
     "Accept": "application/json",
