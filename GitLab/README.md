@@ -134,6 +134,7 @@ python gitlab_tree.py https://lab.hub.nspd.rosreestr.gov.ru/nspd/studio-tg
 python compare_members.py luninas
 # сравнение: какие права есть у suluyanovev, но нет у luninas
 python compare_members.py luninas suluyanovev
+
 ```
 
 Зависимости: python-gitlab, gitlab_app_conf, gitlab_tree.walk_tree.
